@@ -1,0 +1,2 @@
+rootProject.name='BrickListApplication'
+include ':app'
