@@ -1,31 +1,32 @@
 package com.example.bricklistapplication
 
-class Project {
-    private var id : Int? = null
-    private var name : String? = null
-    private var isActive : Boolean? = null
+class Project(id: Int, name: String, active: Boolean) {
+    private var id : Int? = id
+    private var name : String? = name
+    private var isActive : Boolean? = active
 
-    public fun getId(): Int? {
+
+    fun getId(): Int? {
         return id
     }
 
-    public fun getName(): String? {
+    fun getName(): String? {
         return name
     }
 
-    public fun getIsActive() : Boolean?{
+    fun getIsActive() : Boolean?{
         return isActive
     }
 
-    public fun setId(value: Int){
+    fun setId(value: Int){
         id = value
     }
 
-    public fun setName(value: String){
+    fun setName(value: String){
         name = value
     }
 
-    public fun setIsActive(value: Boolean){
+    fun setIsActive(value: Boolean){
         isActive = value
     }
 }

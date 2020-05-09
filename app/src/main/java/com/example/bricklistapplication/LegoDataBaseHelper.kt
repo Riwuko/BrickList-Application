@@ -13,9 +13,12 @@ import java.io.InputStream
 import java.io.OutputStream
 
 
-class LegoDataBaseHelper(private val mContext: Context?) : SQLiteOpenHelper(mContext, DB_NAME, null, 1) {
+class LegoDataBaseHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, 1) {
 
     private var mDataBase: SQLiteDatabase? = null
+    private val mContext: Context? = context
+
+//    DATA-BASE CREATING FUNCTIONS
 
     fun createDataBase() {
 
@@ -34,9 +37,7 @@ class LegoDataBaseHelper(private val mContext: Context?) : SQLiteOpenHelper(mCon
             temporaryDataBase = SQLiteDatabase.openDatabase(fullPath, null, SQLiteDatabase.OPEN_READONLY)
 
         } catch (e: SQLiteException) {
-
             Log.d("checkDataBase", "DataBase doesn't exist");
-
         }
 
         temporaryDataBase?.close()
@@ -58,12 +59,6 @@ class LegoDataBaseHelper(private val mContext: Context?) : SQLiteOpenHelper(mCon
         mInput.close()
     }
 
-    @Throws(SQLException::class)
-    fun openDataBase() {
-        val stringPath = DB_PATH + DB_NAME
-        mDataBase = SQLiteDatabase.openDatabase(stringPath, null, SQLiteDatabase.OPEN_READONLY)
-
-    }
 
     @Synchronized
     override fun close() {
@@ -78,12 +73,36 @@ class LegoDataBaseHelper(private val mContext: Context?) : SQLiteOpenHelper(mCon
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
     }
 
-
     companion object {
         private val DB_NAME = "BrickList.db"
         @SuppressLint("SdCardPath")
         private val DB_PATH = "data/data/com.example.bricklistapplication/databases/"
     }
+
+    
+//    DATA BASE APP OPERATIONS
+
+    fun getProjects(activeOnly: Boolean) : MutableList<Project>{
+        val projects = mutableListOf<Project>()
+        val db = this.writableDatabase
+
+        var query:String? = null
+        if (activeOnly) query = "SELECT * FROM Inventories WHERE Active=1"
+        else  query = "SELECT * FROM Inventories"
+
+        val cursor = db.rawQuery(query,null)
+        while(cursor.moveToNext()){
+            val name  = cursor.getString(1)
+            val id = cursor.getInt(0)
+            val active = cursor.getInt(2).toBoolean()
+            val project  = Project(id,name,active)
+            projects.add(project)
+        }
+        cursor.close()
+        return projects
+    }
+
+    fun Int.toBoolean() = this==1
 
 
 }
