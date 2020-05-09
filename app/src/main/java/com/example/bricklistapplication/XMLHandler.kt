@@ -1,15 +1,15 @@
 package com.example.bricklistapplication
 
+import org.w3c.dom.Element
 import org.w3c.dom.Node
 import org.xml.sax.InputSource
 import java.io.File
 import java.io.StringReader
-import org.w3c.dom.Element
 import javax.xml.parsers.DocumentBuilderFactory
 
 class XMLHandler(filePath: String) {
 
-    fun readXML(filePath: String) {
+    fun readXML(filePath: String): ArrayList<ArrayList<String>> {
         val xmlFile = File(filePath)
         val dbFactory = DocumentBuilderFactory.newInstance()
         val dBuilder = dbFactory.newDocumentBuilder()
@@ -17,30 +17,24 @@ class XMLHandler(filePath: String) {
         val doc = dBuilder.parse(xmlInput)
 
         val itemList = doc.getElementsByTagName("ITEM")
+        var allItemsFeatures: ArrayList<ArrayList<String>> = ArrayList()
 
         for (temp in 0 until itemList.length) {
-
             val node = itemList.item(temp)
-            System.out.println("\nCurrent Element :" + node.nodeName)
             if (node.nodeType == Node.ELEMENT_NODE) {
-                val eElement = node as Element
-                if (eElement.getElementsByTagName("ALTERNATE").item(0).textContent == "N") {
+                val singleItem = node as Element
+                if (singleItem.getElementsByTagName("ALTERNATE").item(0).textContent == "N") {
+                    val singleItemFeature: ArrayList<String> = ArrayList()
+                    singleItemFeature.add(singleItem.getElementsByTagName("ITEMTYPE").item(0).textContent)
+                    singleItemFeature.add(singleItem.getElementsByTagName("QTY").item(0).textContent)
+                    singleItemFeature.add(singleItem.getElementsByTagName("ITEMID").item(0).textContent)
+                    singleItemFeature.add(singleItem.getElementsByTagName("COLOR").item(0).textContent)
 
-                    val itemTypeID = eElement.getElementsByTagName("ITEMTYPE").item(0).textContent
-                    val quantityNeeded =
-                        eElement.getElementsByTagName("QTY").item(0).textContent.toInt()
-                    val itemID = eElement.getElementsByTagName("ITEMID").item(0).textContent
-                    val colorID = eElement.getElementsByTagName("COLOR").item(0).textContent
-                    println(itemTypeID)
-                    println(quantityNeeded)
-                    println(itemID)
-                    println(colorID)
-//                    val part = InventoryPart(inventoryID,itemTypeID,itemID,quantityNeeded,0,colorID,extras)
-//                    DBHepler.insertInventoryPart(part)
-//                    DBHepler.close()
+                    allItemsFeatures.add(singleItemFeature)
                 }
             }
         }
+        return allItemsFeatures
     }
 
 }

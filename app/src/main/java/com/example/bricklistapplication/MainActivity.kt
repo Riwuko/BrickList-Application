@@ -1,5 +1,6 @@
 package com.example.bricklistapplication
 
+import LegoDataBaseHelper
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -55,7 +56,6 @@ class MainActivity : AppCompatActivity() {
 
     fun loadDataBase(){
         LegoDataBase = LegoDataBaseHelper(applicationContext)
-        LegoDataBase!!.createDataBase()
     }
 
     fun updateListViewProjects(){

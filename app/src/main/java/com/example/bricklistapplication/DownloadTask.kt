@@ -1,7 +1,6 @@
 package com.example.bricklistapplication
 
 import android.webkit.URLUtil
-import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 import java.io.OutputStream
@@ -9,9 +8,9 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 
-class DownloadTask(downloadUrl: String, fileName: String, filePath: File?) {
+class DownloadTask(downloadUrl: String, fileName: String, filePath: String) {
     private var downloadUrl: String? = downloadUrl
-    private var downloadedFilePath : String? = filePath.toString()
+    private var downloadedFilePath : String? = filePath
     private var downloadFileName : String? = fileName
 
     fun downloadFromURL() : Boolean
