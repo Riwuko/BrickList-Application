@@ -10,8 +10,8 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
-    private var usingPrefix: String? = null
-    private var activeOnly: Boolean? = null
+    private var usingPrefix: String = ""
+    private var activeOnly: Boolean = false
     private var LegoDataBase: LegoDataBaseHelper? = null
     private var projectsList = mutableListOf<Project>()
 
@@ -59,19 +59,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun updateListViewProjects(){
-        activeOnly?.let { LegoDataBase?.getProjects(it) }
+        LegoDataBase?.getProjects(activeOnly)
 //        var inventoryAdapter = InventoryListAdapter(this,R.layout.adapter_view_layout,inventories,DISPLAY_ACTIVE_ONLY)
 //        listView.adapter = inventoryAdapter
     }
 
+
     fun loadApplicationSettings() {
         val sharedPref = getSharedPreferences("Options_prefs", 0)
         if(sharedPref.contains("prefix")) {
-            usingPrefix = sharedPref.getString("prefix", "")
-        }
+            usingPrefix = sharedPref.getString("prefix", "").toString()
+        } else usingPrefix = "http://fcds.cs.put.poznan.pl/MyWeb/BL/"
         if(sharedPref.contains("activeOnly")) {
-            activeOnly = sharedPref.getString("activeOnly", "")?.toBoolean()
-        }
+            activeOnly = sharedPref.getString("activeOnly", "")?.toBoolean()!!
+        } else activeOnly = false
     }
 
 
