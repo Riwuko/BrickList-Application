@@ -17,7 +17,7 @@
         tools:targetApi="m">
         <activity android:name=".SinglePackageElementActivity" />
         <activity android:name=".IsProjectActiveActivity" />
-        <activity android:name=".PackageActivity" />
+        <activity android:name=".ProjectActivity" />
         <activity android:name=".AddProjectActivity" />
         <activity android:name=".SettingsActivity" />
         <activity android:name=".MainActivity">

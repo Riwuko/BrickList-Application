@@ -54,19 +54,19 @@ class AddProjectActivity : AppCompatActivity() {
             val project: Project? = projectName?.let { Project(projectID, it, true) }
             LegoDataBaseHelper.insertProject(project)
 
-            val quantityInStore = 0
+            val brickQuantityInStore = 0
             val brickItemType = item[0]
-            val brickQuantityInSet = item[1]
-            val brickItemId = item[2]
+            val brickQuantityInSet = item[1].toInt()
+            val brickItemId = item[2].toInt()
             val brickColor = item[3]
 
             val brickTypeID = LegoDataBaseHelper.getBrickTypeID(brickItemType)
             val colorID = LegoDataBaseHelper.getColorID(brickColor)
-            val brickId = LegoDataBaseHelper.generateBrickID()
+            val brickID = LegoDataBaseHelper.generateBrickID()
 
-            val part = InventoryPart(inventoryID,itemTypeID,itemID,quantityNeeded,0,colorID,extras)
-            LegoDataBaseHelper.insertInventoryPart(part)
-            LegoDataBaseHelper.close()
+            val part = SinglePackageElement(projectID,brickTypeID,brickID,colorID,brickQuantityInSet,brickQuantityInStore)
+            LegoDataBaseHelper.insertPackageElement(part)
+            LegoDataBaseHelper?.close()
         }
     }
 

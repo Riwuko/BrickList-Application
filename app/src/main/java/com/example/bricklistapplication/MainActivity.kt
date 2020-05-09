@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.provider.AlarmClock.EXTRA_MESSAGE
 import android.widget.AdapterView
 import kotlinx.android.synthetic.main.activity_main.*
-import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -37,7 +36,7 @@ class MainActivity : AppCompatActivity() {
     fun setOnClickProject(){
         listViewProjects.onItemClickListener =
             AdapterView.OnItemClickListener { parent, view, position, id ->
-                val intent = Intent(this, PackageActivity::class.java)
+                val intent = Intent(this, ProjectActivity::class.java)
                 intent.putExtra(EXTRA_MESSAGE + '1', projectsList.get(position).getId())
                 intent.putExtra(EXTRA_MESSAGE + '2', projectsList.get(position).getName())
                 startActivity(intent)
