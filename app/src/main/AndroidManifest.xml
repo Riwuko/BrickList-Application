@@ -16,7 +16,7 @@
         android:theme="@style/AppTheme"
         tools:targetApi="m">
         <activity android:name=".SinglePackageElementActivity" />
-        <activity android:name=".IsProjectActiveActivity" />
+        <activity android:name=".ProjectsListElementActivity" />
         <activity android:name=".ProjectActivity" />
         <activity android:name=".AddProjectActivity" />
         <activity android:name=".SettingsActivity" />

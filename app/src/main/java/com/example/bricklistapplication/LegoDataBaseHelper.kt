@@ -1,9 +1,11 @@
+import android.content.ContentValues
 import android.content.Context
 import android.database.SQLException
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.os.Build
 import com.example.bricklistapplication.Project
+import com.example.bricklistapplication.SinglePackageElement
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -19,6 +21,8 @@ class LegoDataBaseHelper(context: Context) :
     private var mDataBase: SQLiteDatabase? = null
     private val mContext: Context
     private var mNeedUpdate = false
+
+//    DATA-BASE LIVE FUNCTIONS
 
     @Throws(IOException::class)
     fun updateDataBase() {
@@ -104,6 +108,79 @@ class LegoDataBaseHelper(context: Context) :
         this.readableDatabase
     }
 
+
+//    DATA-BASE OPERATIONS FUNCTIONS
+
+    fun insertProject(project:Project){
+        val values = ContentValues()
+        values.put("Id",project.getId())
+        values.put("Name",project.getName())
+        values.put("Active",project.getIsActive())
+
+        insertRowToTable("Inventories",values)
+    }
+
+    fun insertRowToTable(table:String, values:ContentValues){
+        val db = this.writableDatabase
+        db.insert(table,null,values)
+        db.close()
+    }
+
+    fun performRequestToFirstInteger(query:String): Int {
+        val db = this.writableDatabase
+        val cursor = db.rawQuery(query,null)
+        var found = 0
+        if(cursor.moveToFirst()){
+            found = Integer.parseInt(cursor.getString(0))
+            cursor.close()
+        }
+        db.close()
+        return found
+    }
+
+    fun performRequestToFirstString(query:String): String {
+        val db = this.writableDatabase
+        val cursor = db.rawQuery(query,null)
+        var found = ""
+        if(cursor.moveToFirst()){
+            found = cursor.getString(0)
+            cursor.close()
+        }
+        db.close()
+        return found
+    }
+
+    fun insertPackageElement(packageElement: SinglePackageElement){
+        val values = ContentValues()
+        values.put("InventoryID",packageElement.getProjectID())
+        values.put("ItemID",packageElement.getElementID())
+        values.put("TypeID",packageElement.getElementTypeID())
+        values.put("ColorID",packageElement.getElementColorID())
+        values.put("QuantityInSet",packageElement.getQuantityInSet())
+        values.put("QuantityInStore",packageElement.getQuantityInStore())
+
+        insertRowToTable("InventoriesParts",values)
+    }
+
+    fun generateProjectID(): Int {
+        val query = "SELECT _id FROM Inventories WHERE  _id = (SELECT MAX(_id)  FROM Inventories)"
+        return performRequestToFirstInteger(query)
+    }
+
+    fun getBrickID(elementID:String): Int {
+        val query = "Select Code FROM Parts WHERE id =  $elementID"
+        return performRequestToFirstInteger(query)
+    }
+
+    fun getBrickTypeID(elementType:String):Int{
+        val query = "SELECT id FROM ItemTypes WHERE code =  $elementType"
+        return performRequestToFirstInteger(query)
+    }
+
+    fun getColorID(elementColor:String): Int {
+        val query = "SELECT _id FROM Colors WHERE  code= $elementColor"
+        return performRequestToFirstInteger(query)
+    }
 
     fun getProjects(activeOnly: Boolean) : MutableList<Project>{
         val projects = mutableListOf<Project>()

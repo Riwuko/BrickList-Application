@@ -40,32 +40,38 @@ class AddProjectActivity : AppCompatActivity() {
             showNameProjectDialog(this)
             val packageItems = loadPackageData(fullFilePath)
             createProject(packageItems)
+            val toast = Toast.makeText(applicationContext, "Dodano projekt $projectName",Toast.LENGTH_SHORT)
+            toast.show()
         }else{
-            var toast =  Toast.makeText(applicationContext,"Nie znaleziono zestawu o podanym ID!",
+            val toast =  Toast.makeText(applicationContext,"Nie znaleziono zestawu o podanym ID!",
                 Toast.LENGTH_SHORT)
             toast.show()
         }
     }
 
-
     fun createProject(packageItems: ArrayList<ArrayList<String>>){
         for (item in packageItems){
-            val projectID = LegoDataBaseHelper.generateProjectID()
-            val project: Project? = projectName?.let { Project(projectID, it, true) }
-            LegoDataBaseHelper.insertProject(project)
+            var projectID = LegoDataBaseHelper?.generateProjectID()
+            if (projectID==null) projectID=0
+            var project:Project?=null
+            project = Project(projectID.toInt(),projectName.toString(),true)
+                LegoDataBaseHelper?.insertProject(project)
 
             val brickQuantityInStore = 0
             val brickItemType = item[0]
             val brickQuantityInSet = item[1].toInt()
-            val brickItemId = item[2].toInt()
+            val brickItemId = item[2]
             val brickColor = item[3]
 
-            val brickTypeID = LegoDataBaseHelper.getBrickTypeID(brickItemType)
-            val colorID = LegoDataBaseHelper.getColorID(brickColor)
-            val brickID = LegoDataBaseHelper.generateBrickID()
+            var brickTypeID = LegoDataBaseHelper?.getBrickTypeID(brickItemType)
+            if (brickTypeID==null) brickTypeID=0
+            var brickColorID = LegoDataBaseHelper?.getColorID(brickColor)
+            if (brickColorID==null) brickColorID=0
+            var brickID = LegoDataBaseHelper?.getBrickID(brickItemId)
+            if (brickID==null) brickID=0
 
-            val part = SinglePackageElement(projectID,brickTypeID,brickID,colorID,brickQuantityInSet,brickQuantityInStore)
-            LegoDataBaseHelper.insertPackageElement(part)
+            val packageElement = SinglePackageElement(projectID,brickID.toInt(),brickTypeID.toInt(),brickColorID.toInt(),brickQuantityInSet,brickQuantityInStore)
+            LegoDataBaseHelper?.insertPackageElement(packageElement)
             LegoDataBaseHelper?.close()
         }
     }

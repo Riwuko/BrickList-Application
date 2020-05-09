@@ -8,4 +8,28 @@ class SinglePackageElement (projectID:Int,elementID:Int, elementTypeID:Int,eleme
     private val elementQuantityInSet: Int? = elementQuantityInSet
     private val elementQuantityInStore: Int? = elementQuantityInStore
 
+
+    fun getProjectID(): Int? {
+        return projectID
+    }
+
+    fun getElementID(): Int? {
+        return elementID
+    }
+
+    fun getElementTypeID(): Int? {
+        return elementTypeID
+    }
+
+    fun getElementColorID(): Int? {
+        return elementColorID
+    }
+
+    fun getQuantityInSet(): Int? {
+        return elementQuantityInSet
+    }
+
+    fun getQuantityInStore(): Int? {
+        return elementQuantityInStore
+    }
 }

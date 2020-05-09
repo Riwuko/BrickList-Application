@@ -59,7 +59,7 @@ class MainActivity : AppCompatActivity() {
 
     fun updateListViewProjects(){
         LegoDataBase?.getProjects(activeOnly)
-//        var inventoryAdapter = InventoryListAdapter(this,R.layout.adapter_view_layout,inventories,DISPLAY_ACTIVE_ONLY)
+//        val projectsList = (this,R.layout.adapter_view_layout,inventories,DISPLAY_ACTIVE_ONLY)
 //        listView.adapter = inventoryAdapter
     }
 
