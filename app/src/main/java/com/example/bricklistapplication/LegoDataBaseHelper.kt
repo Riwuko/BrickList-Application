@@ -1,89 +1,219 @@
-package com.example.bricklistapplication
-
-import android.annotation.SuppressLint
+import android.content.ContentValues
 import android.content.Context
 import android.database.SQLException
 import android.database.sqlite.SQLiteDatabase
-import android.database.sqlite.SQLiteException
 import android.database.sqlite.SQLiteOpenHelper
-import android.util.Log
+import android.os.Build
+import androidx.annotation.RequiresApi
+import com.example.bricklistapplication.Project
+import com.example.bricklistapplication.SinglePackageElement
+import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
-import java.io.InputStream
 import java.io.OutputStream
+import java.time.LocalDateTime
 
-
-class LegoDataBaseHelper(private val mContext: Context?) : SQLiteOpenHelper(mContext, DB_NAME, null, 1) {
-
+class LegoDataBaseHelper(context: Context) :
+    SQLiteOpenHelper(
+        context,
+        DB_NAME,
+        null,
+        DB_VERSION
+    ) {
     private var mDataBase: SQLiteDatabase? = null
+    private val mContext: Context
+    private var mNeedUpdate = false
 
-    fun createDataBase() {
+//    DATA-BASE LIVE FUNCTIONS
 
-        var temporaryDataBase : SQLiteDatabase?=null
-        if (!checkDataBase()) {
-            temporaryDataBase = this.readableDatabase
-            temporaryDataBase.close()
+    @Throws(IOException::class)
+    fun updateDataBase() {
+        if (mNeedUpdate) {
+            val dbFile =
+                File(DB_PATH + DB_NAME)
+            if (dbFile.exists()) dbFile.delete()
             copyDataBase()
+            mNeedUpdate = false
         }
     }
 
     private fun checkDataBase(): Boolean {
-        var temporaryDataBase : SQLiteDatabase?=null
-        val fullPath = DB_PATH + DB_NAME
-        try {
-            temporaryDataBase = SQLiteDatabase.openDatabase(fullPath, null, SQLiteDatabase.OPEN_READONLY)
+        val dbFile =
+            File(DB_PATH + DB_NAME)
+        return dbFile.exists()
+    }
 
-        } catch (e: SQLiteException) {
-
-            Log.d("checkDataBase", "DataBase doesn't exist");
-
+    private fun copyDataBase() {
+        if (!checkDataBase()) {
+            this.readableDatabase
+            close()
+            try {
+                copyDBFile()
+            } catch (mIOException: IOException) {
+                throw Error("ErrorCopyingDataBase")
+            }
         }
-
-        temporaryDataBase?.close()
-        return temporaryDataBase != null
     }
 
     @Throws(IOException::class)
-    private fun copyDataBase(): Unit {
-        val mInput: InputStream =  mContext!!.getAssets().open(DB_NAME)
-        val stringFileName = DB_PATH + DB_NAME
-        val mOutput: OutputStream = FileOutputStream(stringFileName)
+    private fun copyDBFile() {
+        val mInput =
+            mContext.assets.open(DB_NAME)
+        val mOutput: OutputStream =
+            FileOutputStream(DB_PATH + DB_NAME)
         val mBuffer = ByteArray(1024)
-        var mLength: Int = 0
-        while (mInput.read(mBuffer).also({ mLength = it }) > 0) {
-            mOutput.write(mBuffer, 0, mLength)
-        }
+        var mLength: Int
+        while (mInput.read(mBuffer).also { mLength = it } > 0) mOutput.write(mBuffer, 0, mLength)
         mOutput.flush()
         mOutput.close()
         mInput.close()
     }
 
     @Throws(SQLException::class)
-    fun openDataBase() {
-        val stringPath = DB_PATH + DB_NAME
-        mDataBase = SQLiteDatabase.openDatabase(stringPath, null, SQLiteDatabase.OPEN_READONLY)
-
+    fun openDataBase(): Boolean {
+        mDataBase = SQLiteDatabase.openDatabase(
+            DB_PATH + DB_NAME,
+            null,
+            SQLiteDatabase.CREATE_IF_NECESSARY
+        )
+        return mDataBase != null
     }
 
     @Synchronized
     override fun close() {
-        if (mDataBase != null)
-            mDataBase!!.close()
+        if (mDataBase != null) mDataBase!!.close()
         super.close()
     }
 
-    override fun onCreate(db: SQLiteDatabase) {
+    override fun onCreate(db: SQLiteDatabase) {}
+    override fun onUpgrade(
+        db: SQLiteDatabase,
+        oldVersion: Int,
+        newVersion: Int
+    ) {
+        if (newVersion > oldVersion) mNeedUpdate = true
     }
-
-    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-    }
-
 
     companion object {
-        private val DB_NAME = "BrickList.db"
-        @SuppressLint("SdCardPath")
-        private val DB_PATH = "data/data/com.example.bricklistapplication/databases/"
+        private const val DB_NAME = "BrickList.db"
+        private var DB_PATH = ""
+        private const val DB_VERSION = 1
+    }
+
+    init {
+        DB_PATH =
+            if (Build.VERSION.SDK_INT >= 17) context.applicationInfo.dataDir + "/databases/" else "/data/data/" + context.packageName + "/databases/"
+        println(DB_PATH)
+        println("\n\n\n\n")
+        mContext = context
+        copyDataBase()
+        this.readableDatabase
     }
 
 
+//    DATA-BASE OPERATIONS FUNCTIONS
+
+    fun insertRowToTable(table:String, values:ContentValues){
+        val db = this.writableDatabase
+        db.insert(table,null,values)
+        db.close()
+    }
+
+    fun insertProject(project:Project){
+        val values = ContentValues()
+        values.put("Name",project.getName())
+        values.put("Active",project.getIsActive())
+        values.put("LastAccessed", project.getLastAccessed())
+        insertRowToTable("Inventories",values)
+    }
+
+    fun insertPackageElement(packageElement: SinglePackageElement){
+        val values = ContentValues()
+        values.put("InventoryID",packageElement.getProjectID())
+        values.put("ItemID",packageElement.getElementID())
+        values.put("TypeID",packageElement.getElementTypeID())
+        values.put("ColorID",packageElement.getElementColorID())
+        values.put("QuantityInSet",packageElement.getQuantityInSet())
+        values.put("QuantityInStore",packageElement.getQuantityInStore())
+
+        insertRowToTable("InventoriesParts",values)
+    }
+
+    fun performRequestToFirstInteger(query:String): Int {
+        val db = this.writableDatabase
+        val cursor = db.rawQuery(query,null)
+        var found = 0
+        if(cursor.moveToFirst()){
+            found = Integer.parseInt(cursor.getString(0))
+            cursor.close()
+        }
+        db.close()
+        return found
+    }
+
+    fun performRequestToFirstString(query:String): String {
+        val db = this.writableDatabase
+        val cursor = db.rawQuery(query,null)
+        var found = ""
+        if(cursor.moveToFirst()){
+            found = cursor.getString(0)
+            cursor.close()
+        }
+        db.close()
+        return found
+    }
+
+    fun generateProjectID(): Int {
+        val query = "SELECT id FROM Inventories WHERE id = (SELECT MAX(id)  FROM Inventories)"
+        return performRequestToFirstInteger(query)
+    }
+
+    fun getBrickID(elementID:String): Int {
+        val query = "SELECT id FROM Parts WHERE  Code='$elementID'"
+        return performRequestToFirstInteger(query)
+    }
+
+    fun getBrickTypeID(elementType:String):Int{
+        val query = "SELECT id FROM ItemTypes WHERE Code='$elementType'"
+        return performRequestToFirstInteger(query)
+    }
+
+    fun getColorID(elementColor:String): Int {
+        val query = "SELECT id FROM Colors WHERE Code='$elementColor'"
+        return performRequestToFirstInteger(query)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun getProjects(activeOnly: Boolean) : MutableList<Project>{
+        val projects = mutableListOf<Project>()
+        val db = this.writableDatabase
+
+        var query = ""
+        query = if (activeOnly) "SELECT * FROM Inventories WHERE Active=1"
+        else "SELECT * FROM Inventories"
+
+        val cursor = db.rawQuery(query,null)
+        while(cursor.moveToNext()){
+            val name  = cursor.getString(1)
+            val id = cursor.getInt(0)
+            val active = cursor.getInt(2).toBoolean()
+            val curDate = LocalDateTime.now().toString()
+            val project  = Project(id,name,active, curDate)
+            projects.add(project)
+        }
+        cursor.close()
+        return projects
+    }
+
+    fun Int.toBoolean() = if (this==1) true else false
+    fun Boolean.toInt() = if (this) 1 else 0
+
+    fun activateProject(isActive:Boolean,projectID:Int){
+        val values = ContentValues()
+        values.put("Active",isActive.toInt())
+        val db = this.writableDatabase
+        val strFilter = "id=$projectID"
+        db.update("Inventories",values,strFilter,null)
+        db.close()
+    }
 }

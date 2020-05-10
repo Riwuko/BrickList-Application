@@ -21,7 +21,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
-        android:id="@+id/textViewPackage"
+        android:id="@+id/editTextPackage"
         android:layout_width="311dp"
         android:layout_height="56dp"
         android:layout_marginTop="32dp"

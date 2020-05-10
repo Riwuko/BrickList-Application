@@ -1,31 +1,38 @@
 package com.example.bricklistapplication
 
-class Project {
-    private var id : Int? = null
-    private var name : String? = null
-    private var isActive : Boolean? = null
+import android.os.Build
+import androidx.annotation.RequiresApi
+import java.time.LocalDateTime
+import java.util.*
 
-    public fun getId(): Int? {
+class Project(id: Int, name: String, active: Boolean, date: String) {
+    private var id : Int? = id
+    private var name : String? = name
+    private var isActive : Boolean? = active
+    private var lastAccessed : String = date
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun getLastAccessedAsDate(): LocalDateTime {
+        return LocalDateTime.parse(lastAccessed)
+    }
+
+    fun getId(): Int? {
         return id
     }
 
-    public fun getName(): String? {
+    fun getName(): String? {
         return name
     }
 
-    public fun getIsActive() : Boolean?{
+    fun getIsActive() : Boolean?{
         return isActive
     }
 
-    public fun setId(value: Int){
-        id = value
+    fun getLastAccessed(): String?{
+        return lastAccessed
     }
 
-    public fun setName(value: String){
-        name = value
-    }
-
-    public fun setIsActive(value: Boolean){
+    fun setIsActive(value: Boolean){
         isActive = value
     }
 }

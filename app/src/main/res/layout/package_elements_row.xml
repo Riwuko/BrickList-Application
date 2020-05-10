@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/row"
+    android:baselineAligned="false">
+
+
+        <ImageView
+            android:id="@+id/imageViewLegoPicture"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:gravity="center"
+            android:layout_weight="20"
+            android:textAlignment="center" />
+
+        <TextView
+            android:id="@+id/textViewLegoName"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:gravity="center"
+            android:layout_weight="20"
+            android:textAlignment="center" />
+
+    <TextView
+        android:id="@+id/textViewLegoDes"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:gravity="center"
+        android:layout_weight="20"
+        android:textAlignment="center" />
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="20"
+        android:weightSum="100">
+        <TextView
+            android:id="@+id/textViewAdd"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:gravity="center"
+            android:layout_weight="50"
+            android:textAlignment="center" />
+
+        <TextView
+            android:id="@+id/textViewLegoSubstract"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:gravity="center"
+            android:layout_weight="50"
+            android:textAlignment="center" />
+    </LinearLayout>
+
+</LinearLayout>
