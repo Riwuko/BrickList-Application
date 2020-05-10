@@ -59,8 +59,8 @@ class MainActivity : AppCompatActivity() {
 
     fun updateListViewProjects(){
         LegoDataBase?.getProjects(activeOnly)
-//        val projectsList = (this,R.layout.adapter_view_layout,inventories,DISPLAY_ACTIVE_ONLY)
-//        listView.adapter = inventoryAdapter
+        val projectsListAdapter = ProjectsListAdapter(this, R.layout.projects_list_row,projectsList,activeOnly)
+        listViewProjects.adapter = projectsListAdapter
     }
 
 

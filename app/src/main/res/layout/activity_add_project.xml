@@ -22,6 +22,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <TextView
+        android:id="@+id/textQuestionName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:gravity="center"
+        android:text="Nazwij go!"
+        android:textColor="#FFF"
+        android:textSize="24dp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/editTextPackage" />
+
     <EditText
         android:id="@+id/editTextPackage"
         android:layout_width="255dp"
@@ -33,6 +47,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textQuestion" />
 
+    <EditText
+        android:id="@+id/editTextName"
+        android:layout_width="255dp"
+        android:layout_height="51dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/list_layout"
+        android:inputType="textPersonName"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textQuestionName" />
+
     <Button
         android:id="@+id/buttonAddPackage"
         android:layout_width="70dp"
@@ -42,11 +67,9 @@
         android:text="+"
         android:textColor="#FFFFFF"
         android:textSize="24sp"
-        android:onClick="buttonAddPackageOnClick"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextPackage"
+        app:layout_constraintTop_toBottomOf="@+id/editTextName"
         tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

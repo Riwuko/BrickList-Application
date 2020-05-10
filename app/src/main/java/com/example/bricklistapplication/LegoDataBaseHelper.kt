@@ -4,12 +4,14 @@ import android.database.SQLException
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.os.Build
+import androidx.annotation.RequiresApi
 import com.example.bricklistapplication.Project
 import com.example.bricklistapplication.SinglePackageElement
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.OutputStream
+import java.time.LocalDateTime
 
 class LegoDataBaseHelper(context: Context) :
     SQLiteOpenHelper(
@@ -111,19 +113,30 @@ class LegoDataBaseHelper(context: Context) :
 
 //    DATA-BASE OPERATIONS FUNCTIONS
 
-    fun insertProject(project:Project){
-        val values = ContentValues()
-        values.put("Id",project.getId())
-        values.put("Name",project.getName())
-        values.put("Active",project.getIsActive())
-
-        insertRowToTable("Inventories",values)
-    }
-
     fun insertRowToTable(table:String, values:ContentValues){
         val db = this.writableDatabase
         db.insert(table,null,values)
         db.close()
+    }
+
+    fun insertProject(project:Project){
+        val values = ContentValues()
+        values.put("Name",project.getName())
+        values.put("Active",project.getIsActive())
+        values.put("LastAccessed", project.getLastAccessed())
+        insertRowToTable("Inventories",values)
+    }
+
+    fun insertPackageElement(packageElement: SinglePackageElement){
+        val values = ContentValues()
+        values.put("InventoryID",packageElement.getProjectID())
+        values.put("ItemID",packageElement.getElementID())
+        values.put("TypeID",packageElement.getElementTypeID())
+        values.put("ColorID",packageElement.getElementColorID())
+        values.put("QuantityInSet",packageElement.getQuantityInSet())
+        values.put("QuantityInStore",packageElement.getQuantityInStore())
+
+        insertRowToTable("InventoriesParts",values)
     }
 
     fun performRequestToFirstInteger(query:String): Int {
@@ -150,52 +163,42 @@ class LegoDataBaseHelper(context: Context) :
         return found
     }
 
-    fun insertPackageElement(packageElement: SinglePackageElement){
-        val values = ContentValues()
-        values.put("InventoryID",packageElement.getProjectID())
-        values.put("ItemID",packageElement.getElementID())
-        values.put("TypeID",packageElement.getElementTypeID())
-        values.put("ColorID",packageElement.getElementColorID())
-        values.put("QuantityInSet",packageElement.getQuantityInSet())
-        values.put("QuantityInStore",packageElement.getQuantityInStore())
-
-        insertRowToTable("InventoriesParts",values)
-    }
-
     fun generateProjectID(): Int {
         val query = "SELECT _id FROM Inventories WHERE  _id = (SELECT MAX(_id)  FROM Inventories)"
         return performRequestToFirstInteger(query)
     }
 
     fun getBrickID(elementID:String): Int {
-        val query = "Select Code FROM Parts WHERE id =  $elementID"
+        val query = "SELECT _id FROM Parts WHERE  Code='$elementID'"
         return performRequestToFirstInteger(query)
     }
 
     fun getBrickTypeID(elementType:String):Int{
-        val query = "SELECT id FROM ItemTypes WHERE code =  $elementType"
+        val query = "SELECT _id FROM ItemTypes WHERE Code='$elementType'"
         return performRequestToFirstInteger(query)
     }
 
     fun getColorID(elementColor:String): Int {
-        val query = "SELECT _id FROM Colors WHERE  code= $elementColor"
+        val query = "SELECT _id FROM Colors WHERE Code='$elementColor'"
         return performRequestToFirstInteger(query)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun getProjects(activeOnly: Boolean) : MutableList<Project>{
         val projects = mutableListOf<Project>()
         val db = this.writableDatabase
 
         var query = ""
-        if (activeOnly) query = "SELECT * FROM Inventories WHERE Active=1"
-        else  query = "SELECT * FROM Inventories"
+        query = if (activeOnly) "SELECT * FROM Inventories WHERE Active=1"
+        else "SELECT * FROM Inventories"
 
         val cursor = db.rawQuery(query,null)
         while(cursor.moveToNext()){
             val name  = cursor.getString(1)
             val id = cursor.getInt(0)
             val active = cursor.getInt(2).toBoolean()
-            val project  = Project(id,name,active)
+            val curDate = LocalDateTime.now().toString()
+            val project  = Project(id,name,active, curDate)
             projects.add(project)
         }
         cursor.close()
@@ -203,4 +206,10 @@ class LegoDataBaseHelper(context: Context) :
     }
 
     fun Int.toBoolean() = this==1
+
+    fun activateProject(projectID:Int):Boolean{
+        val success=true
+
+        return success
+    }
 }

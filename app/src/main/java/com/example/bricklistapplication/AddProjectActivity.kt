@@ -1,15 +1,16 @@
 package com.example.bricklistapplication
 
 import LegoDataBaseHelper
-import android.app.AlertDialog
-import android.content.Context
+import android.os.Build
 import android.os.Bundle
-import android.view.View
-import android.widget.EditText
+import android.util.Log
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_add_project.*
 import java.io.File
+import java.time.LocalDateTime
+import kotlin.collections.ArrayList
 
 
 class AddProjectActivity : AppCompatActivity() {
@@ -26,53 +27,62 @@ class AddProjectActivity : AppCompatActivity() {
 
         loadApplicationSettings()
         loadDataBase()
-    }
 
-    fun buttonAddPackageOnClick(view: View) {
-        getIdInputValue()
-
-        val fileUrl = usingPrefix + choosenId + ".xml"
-        val filePath: File? = this.getExternalFilesDir(null)
-        val fileName = choosenId.toString() + ".xml"
-        val fullFilePath = filePath.toString()+fileName
-
-        if (downloadFile(fileUrl,filePath.toString(),fileName)) {
-            showNameProjectDialog(this)
-            val packageItems = loadPackageData(fullFilePath)
-            createProject(packageItems)
-            val toast = Toast.makeText(applicationContext, "Dodano projekt $projectName",Toast.LENGTH_SHORT)
-            toast.show()
-        }else{
-            val toast =  Toast.makeText(applicationContext,"Nie znaleziono zestawu o podanym ID!",
-                Toast.LENGTH_SHORT)
-            toast.show()
+        buttonAddPackage.setOnClickListener(){
+            addNewProject()
         }
     }
 
-    fun createProject(packageItems: ArrayList<ArrayList<String>>){
-        for (item in packageItems){
-            var projectID = LegoDataBaseHelper?.generateProjectID()
-            if (projectID==null) projectID=0
-            var project:Project?=null
-            project = Project(projectID.toInt(),projectName.toString(),true)
-                LegoDataBaseHelper?.insertProject(project)
+    fun addNewProject() {
+        if(getInputValues()) {
+            val fileUrl = usingPrefix + choosenId + ".xml"
+            val filePath: File? = this.getExternalFilesDir(null)
+            val fileName = choosenId.toString() + ".xml"
+            val fullFilePath = filePath.toString() + fileName
 
+            if (downloadFile(fileUrl, fileName, filePath.toString())) {
+                val packageItems = loadPackageData(fullFilePath)
+                createProject(packageItems)
+                createToast("Dodano projekt $projectName")
+
+            } else createToast("Nie znaleziono zestawu o podanym ID!")
+        }else createToast("Wprowadzono błędne dane!")
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun createProject(packageItems: ArrayList<ArrayList<String>>){
+        val projectID = LegoDataBaseHelper?.generateProjectID()
+        val project:Project?
+        println("\n\nProjectID: "+projectID)
+        println("ProjectName: "+projectName+"\n\n")
+        project = Project(projectID!!.toInt(),projectName.toString(),true, LocalDateTime.now().toString())
+        LegoDataBaseHelper?.insertProject(project)
+
+        for (item in packageItems){
             val brickQuantityInStore = 0
             val brickItemType = item[0]
             val brickQuantityInSet = item[1].toInt()
             val brickItemId = item[2]
             val brickColor = item[3]
 
-            var brickTypeID = LegoDataBaseHelper?.getBrickTypeID(brickItemType)
-            if (brickTypeID==null) brickTypeID=0
-            var brickColorID = LegoDataBaseHelper?.getColorID(brickColor)
-            if (brickColorID==null) brickColorID=0
-            var brickID = LegoDataBaseHelper?.getBrickID(brickItemId)
-            if (brickID==null) brickID=0
+            val brickTypeID = LegoDataBaseHelper?.getBrickTypeID(brickItemType)
+            val brickColorID = LegoDataBaseHelper?.getColorID(brickColor)
+            val brickID = LegoDataBaseHelper?.getBrickID(brickItemId)
 
-            val packageElement = SinglePackageElement(projectID,brickID.toInt(),brickTypeID.toInt(),brickColorID.toInt(),brickQuantityInSet,brickQuantityInStore)
-            LegoDataBaseHelper?.insertPackageElement(packageElement)
-            LegoDataBaseHelper?.close()
+            try {
+                val packageElement = SinglePackageElement(
+                    projectID,
+                    brickID!!.toInt(),
+                    brickTypeID!!.toInt(),
+                    brickColorID!!.toInt(),
+                    brickQuantityInSet,
+                    brickQuantityInStore
+                )
+                LegoDataBaseHelper?.insertPackageElement(packageElement)
+                LegoDataBaseHelper?.close()
+            }catch (ex:Exception) {
+                Log.e("ER","Error creating package element: AddProjectActivity::createProject")
+            }
         }
     }
 
@@ -86,21 +96,21 @@ class AddProjectActivity : AppCompatActivity() {
         return downloadTask.downloadFromURL()
     }
 
-    fun getIdInputValue(){
+    fun getInputValues(): Boolean {
         choosenId = editTextPackage.text.toString().toInt()
+        projectName = editTextName.text.toString()
+        if (choosenId!!.toInt() >=0 && !projectName.isNullOrEmpty() ){
+            return true
+        }
+        return false
     }
 
-    fun showNameProjectDialog(c: Context) {
-        val taskEditText = EditText(c)
-        val dialog: AlertDialog = AlertDialog.Builder(c)
-            .setTitle("Nazwij swój projekt")
-            .setView(taskEditText)
-            .setPositiveButton("Add"
-            ) { dialog, which ->
-                projectName = taskEditText.text.toString()
-            }
-            .create()
-        dialog.show()
+    fun createToast(message:String){
+        val toast = Toast.makeText(
+            applicationContext, message,
+            Toast.LENGTH_SHORT
+        )
+        toast.show()
     }
 
     fun loadDataBase(){
