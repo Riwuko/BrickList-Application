@@ -164,22 +164,22 @@ class LegoDataBaseHelper(context: Context) :
     }
 
     fun generateProjectID(): Int {
-        val query = "SELECT _id FROM Inventories WHERE  _id = (SELECT MAX(_id)  FROM Inventories)"
+        val query = "SELECT id FROM Inventories WHERE id = (SELECT MAX(id)  FROM Inventories)"
         return performRequestToFirstInteger(query)
     }
 
     fun getBrickID(elementID:String): Int {
-        val query = "SELECT _id FROM Parts WHERE  Code='$elementID'"
+        val query = "SELECT id FROM Parts WHERE  Code='$elementID'"
         return performRequestToFirstInteger(query)
     }
 
     fun getBrickTypeID(elementType:String):Int{
-        val query = "SELECT _id FROM ItemTypes WHERE Code='$elementType'"
+        val query = "SELECT id FROM ItemTypes WHERE Code='$elementType'"
         return performRequestToFirstInteger(query)
     }
 
     fun getColorID(elementColor:String): Int {
-        val query = "SELECT _id FROM Colors WHERE Code='$elementColor'"
+        val query = "SELECT id FROM Colors WHERE Code='$elementColor'"
         return performRequestToFirstInteger(query)
     }
 
@@ -205,11 +205,15 @@ class LegoDataBaseHelper(context: Context) :
         return projects
     }
 
-    fun Int.toBoolean() = this==1
+    fun Int.toBoolean() = if (this==1) true else false
+    fun Boolean.toInt() = if (this) 1 else 0
 
-    fun activateProject(projectID:Int):Boolean{
-        val success=true
-
-        return success
+    fun activateProject(isActive:Boolean,projectID:Int){
+        val values = ContentValues()
+        values.put("Active",isActive.toInt())
+        val db = this.writableDatabase
+        val strFilter = "id=$projectID"
+        db.update("Inventories",values,strFilter,null)
+        db.close()
     }
 }

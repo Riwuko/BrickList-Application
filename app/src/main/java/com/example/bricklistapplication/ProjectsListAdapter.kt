@@ -28,15 +28,20 @@ class ProjectsListAdapter(context: Context?, resource: Int, objects: MutableList
     fun checkBoxHandler(checkBox: CheckBox, position: Int){
         loadDataBase()
         val project = getProjectData(position)
+
+        if (project["isActive"]!!.toBoolean()){
+            checkBox.isChecked=true
+        }
+
         checkBox.setOnClickListener {
             if(checkBox.isChecked){
-                legoDataBaseHelper?.activateProject(project["id"]!!.toInt())
+                legoDataBaseHelper?.activateProject(true,project["id"]!!.toInt())
                 getItem(position)?.setIsActive(true)
             } else{
                 getItem(position)!!.setIsActive(false)
                 if(this.active_only)
                     dataSource!!.removeAt(position)
-                legoDataBaseHelper!!.activateProject(project["id"]!!.toInt())
+                legoDataBaseHelper!!.activateProject(false,project["id"]!!.toInt())
             }
             notifyDataSetChanged()
         }

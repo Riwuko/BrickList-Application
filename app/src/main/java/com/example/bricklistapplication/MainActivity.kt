@@ -2,10 +2,12 @@ package com.example.bricklistapplication
 
 import LegoDataBaseHelper
 import android.content.Intent
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.AlarmClock.EXTRA_MESSAGE
 import android.widget.AdapterView
+import androidx.annotation.RequiresApi
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -15,6 +17,7 @@ class MainActivity : AppCompatActivity() {
     private var LegoDataBase: LegoDataBaseHelper? = null
     private var projectsList = mutableListOf<Project>()
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -26,6 +29,7 @@ class MainActivity : AppCompatActivity() {
         setOnClickProject()
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onResume(){
         super.onResume()
         loadDataBase()
@@ -57,8 +61,9 @@ class MainActivity : AppCompatActivity() {
         LegoDataBase = LegoDataBaseHelper(applicationContext)
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun updateListViewProjects(){
-        LegoDataBase?.getProjects(activeOnly)
+        projectsList = LegoDataBase?.getProjects(activeOnly)!!
         val projectsListAdapter = ProjectsListAdapter(this, R.layout.projects_list_row,projectsList,activeOnly)
         listViewProjects.adapter = projectsListAdapter
     }
