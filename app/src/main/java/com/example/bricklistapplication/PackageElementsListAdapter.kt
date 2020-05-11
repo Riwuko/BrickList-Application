@@ -14,7 +14,7 @@ import android.widget.ImageView
 import android.widget.TextView
 
 class PackageElementsListAdapter(context: Context?, resource: Int, objects: MutableList<SinglePackageElement>) : ArrayAdapter<SinglePackageElement>(
-    context!!, resource, objects as MutableList<SinglePackageElement>) {
+    context!!, resource, objects) {
 
     private var adapterContext: Context? = context
     private var adapterLayout: Int = resource
@@ -119,7 +119,6 @@ class PackageElementsListAdapter(context: Context?, resource: Int, objects: Muta
         legoNameText.text = element.getElementCode()
         legoDesText.text = element.getElementDescription()
 
-        println(element.toString())
         val image = getElementImage(position)
         val bm = BitmapFactory.decodeByteArray(image, 0, image!!.size)
         val dm = DisplayMetrics()
