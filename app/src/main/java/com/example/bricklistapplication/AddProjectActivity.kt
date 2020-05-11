@@ -40,7 +40,7 @@ class AddProjectActivity : AppCompatActivity() {
         if(getInputValues()) {
             val fileUrl = usingPrefix + choosenId + ".xml"
             val filePath: File? = this.getExternalFilesDir(null)
-            val fileName = choosenId.toString() + ".xml"
+            val fileName = choosenId.toString() + projectName+ ".xml"
             val fullFilePath = filePath.toString() + fileName
 
             if (downloadFile(fileUrl, fileName, filePath.toString())) {
@@ -74,27 +74,31 @@ class AddProjectActivity : AppCompatActivity() {
 
             val id = LegoDataBaseHelper?.generatePackageElementID()
             val TypeID = LegoDataBaseHelper?.getItemTypeID(brickItemType)
-            val ColorID = LegoDataBaseHelper?.getColorID(brickColor)
+            val ColorID = LegoDataBaseHelper?.getColorID(brickColor)!!
             val ItemID = LegoDataBaseHelper?.getPartID(ItemCode)
-//            val PartCode = LegoDataBaseHelper?.getPartCode(id!!)
-            val PartCode = ItemCode
-            val PartDescription = LegoDataBaseHelper!!.getColorName(ColorID!!) + " " +
-                    LegoDataBaseHelper!!.getPartName(id!!)
+            val PartDescription = LegoDataBaseHelper!!.getColorName(ColorID) + " " +
+                        LegoDataBaseHelper!!.getPartName(id!!)
             val ColorCode = LegoDataBaseHelper?.getColorCode(ColorID)!!
-            val ImageCode = LegoDataBaseHelper?.getCodeImageCode(ItemID!!,ColorID)
+            var ImageCode = LegoDataBaseHelper?.getCodeImageCode(ItemID!!,ColorID)
+            if (ImageCode!!.toInt()==0) {
+                ImageCode = "${id}999".toInt()
+                LegoDataBaseHelper!!.insertRowIntoCodes(ItemID!!,ColorID,ImageCode.toInt())
+            }
+            val TypeCode = LegoDataBaseHelper?.getItemTypeCode(TypeID!!)!!
             try {
                 val packageElement = SinglePackageElement(
                     id,
                     projectID,
                     ItemID!!.toInt(),
                     TypeID!!.toInt(),
-                    ColorID.toInt(),
+                    ColorID,
                     brickQuantityInSet,
                     brickQuantityInStore,
-                    PartCode,
+                    ItemCode,
                     PartDescription,
                     ColorCode,
-                    ImageCode
+                    ImageCode.toString(),
+                    TypeCode
                 )
                 LegoDataBaseHelper?.insertPackageElement(packageElement)
                 LegoDataBaseHelper?.close()
@@ -105,7 +109,7 @@ class AddProjectActivity : AppCompatActivity() {
     }
 
     fun loadPackageData(filePath: String): ArrayList<ArrayList<String>> {
-        val xmlHandler = XMLHandler(filePath)
+        val xmlHandler = XMLHandler()
         return xmlHandler.readXML(filePath)
     }
 

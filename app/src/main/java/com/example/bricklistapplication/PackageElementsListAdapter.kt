@@ -4,14 +4,13 @@ import LegoDataBaseHelper
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.util.DisplayMetrics
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
 
 class PackageElementsListAdapter(context: Context?, resource: Int, objects: MutableList<SinglePackageElement>) : ArrayAdapter<SinglePackageElement>(
     context!!, resource, objects) {
@@ -20,6 +19,9 @@ class PackageElementsListAdapter(context: Context?, resource: Int, objects: Muta
     private var adapterLayout: Int = resource
     private val inflater: LayoutInflater = adapterContext?.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
     private var legoDataBaseHelper: LegoDataBaseHelper? = null
+    private lateinit var elementRow: LinearLayout
+    private lateinit var buttonAdd: Button
+    private lateinit var buttonSubtract: Button
 
     private lateinit var legoAmount: TextView
     private lateinit var legoDesText: TextView
@@ -29,7 +31,6 @@ class PackageElementsListAdapter(context: Context?, resource: Int, objects: Muta
     private var imageUrlsList: ArrayList<String> = ArrayList()
 
     fun buttonHandler(button: Button, position: Int, operation:String) {
-        loadDataBase()
         button.setOnClickListener {
             changeAmountValue(operation, position)
             updateAmountField(position)
@@ -58,6 +59,21 @@ class PackageElementsListAdapter(context: Context?, resource: Int, objects: Muta
         }
     }
 
+    @SuppressLint("ResourceAsColor")
+    fun highlightCollected(position: Int){
+        val element = getItem(position)!!
+        if(element.getQuantityInStore()==element.getQuantityInSet()) {
+            elementRow.setBackgroundColor(Color.parseColor("#4CAF50"))
+            buttonAdd.setTextColor(Color.WHITE)
+            buttonSubtract.setTextColor(Color.WHITE)
+        }
+        else{
+            elementRow.setBackgroundColor(Color.TRANSPARENT)
+            buttonAdd.setTextColor(Color.parseColor("#4CAF50"))
+            buttonSubtract.setTextColor(Color.parseColor("#4CAF50"))
+        }
+    }
+
     fun loadImageUrlsList(imageCode: String?, colorCode: String?, partCode:String){
         val base1 = "https://www.lego.com/service/bricks/5/2/"
         val base2 = "http://img.bricklink.com/P/"
@@ -66,10 +82,10 @@ class PackageElementsListAdapter(context: Context?, resource: Int, objects: Muta
         imageUrlsList.add(base1 + imageCode)
         imageUrlsList.add(base2 + colorCode + '/' + partCode + ".gif")
         imageUrlsList.add(base3 + partCode + ".jpg")
-        print(imageUrlsList)
     }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
+        loadDataBase()
         val retView: View
 
         if (convertView == null) {
@@ -79,9 +95,10 @@ class PackageElementsListAdapter(context: Context?, resource: Int, objects: Muta
         } else {
             retView = convertView
         }
+        elementRow = retView.findViewById<LinearLayout>(R.id.singleRow)
 
-        val buttonAdd = retView.findViewById<Button>(R.id.buttonAddElement)
-        val buttonSubtract = retView.findViewById<Button>(R.id.buttonSubtractElement)
+        buttonAdd = retView.findViewById<Button>(R.id.buttonAddElement)
+        buttonSubtract = retView.findViewById<Button>(R.id.buttonSubtractElement)
         buttonHandler(buttonAdd, position,"add")
         buttonHandler(buttonSubtract, position,"subtract")
 
@@ -91,14 +108,20 @@ class PackageElementsListAdapter(context: Context?, resource: Int, objects: Muta
 
     fun getElementImage(position: Int): ByteArray? {
         val element = getItem(position)!!
-        val photo = legoDataBaseHelper!!.getCodeImage(element.getElementImageCode()!!)
+        var legoImage = legoDataBaseHelper!!.getCodeImage(element.getElementImageCode()!!)
         val name = getItem(position)!!.getElementCode()
-        if(photo==null) run {
+        if(legoImage==null) run {
             loadImageUrlsList(element.getElementImageCode(),element.getElementColorCode(),name!!)
             val downloadTask = DownloadTask()
-            return downloadTask.downloadImage(imageUrlsList)
+            legoImage = downloadTask.downloadImage(imageUrlsList)
+            saveElementImage(legoImage!!,element.getElementImageCode()!!)
+            return  legoImage
         }
-        return null
+        return legoImage
+    }
+
+    fun saveElementImage(img:ByteArray, imageCode:String){
+        legoDataBaseHelper!!.insertImage(imageCode, img)
     }
 
     fun loadDataBase() {
@@ -116,15 +139,21 @@ class PackageElementsListAdapter(context: Context?, resource: Int, objects: Muta
         val amountInStore = element.getQuantityInStore().toString()
         val amountInSet = element.getQuantityInSet().toString()
         legoAmount.text = "$amountInStore/$amountInSet"
+        highlightCollected(position)
+
         legoNameText.text = element.getElementCode()
         legoDesText.text = element.getElementDescription()
 
         val image = getElementImage(position)
-        val bm = BitmapFactory.decodeByteArray(image, 0, image!!.size)
-        val dm = DisplayMetrics()
-        legoImage.minimumHeight = dm.heightPixels
-        legoImage.minimumWidth = dm.widthPixels
-        legoImage.setImageBitmap(bm)
+        try {
+            val bm = BitmapFactory.decodeByteArray(image, 0, image!!.size)
+            val dm = DisplayMetrics()
+            legoImage.minimumHeight = dm.heightPixels
+            legoImage.minimumWidth = dm.widthPixels
+            legoImage.setImageBitmap(bm)
+        }catch (e:Exception){
+            Log.e("PEA","Error setting brick picture")
+        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -132,6 +161,7 @@ class PackageElementsListAdapter(context: Context?, resource: Int, objects: Muta
         val amountInStore = getItem(position)!!.getQuantityInStore().toString()
         val amountInSet = getItem(position)!!.getQuantityInSet().toString()
         legoAmount.text = "$amountInStore/$amountInSet"
+        highlightCollected(position)
     }
 
 }

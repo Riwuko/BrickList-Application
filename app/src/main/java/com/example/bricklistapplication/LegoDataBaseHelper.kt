@@ -24,6 +24,10 @@ class LegoDataBaseHelper(context: Context) :
     private val mContext: Context
     private var mNeedUpdate = false
 
+    private lateinit var queryTable: String
+    private lateinit var queryColumn: String
+    private lateinit var queryCondition: String
+
 //    DATA-BASE LIVE FUNCTIONS
 
     @Throws(IOException::class)
@@ -100,6 +104,7 @@ class LegoDataBaseHelper(context: Context) :
         private const val DB_VERSION = 1
     }
 
+
     init {
         DB_PATH =
             if (Build.VERSION.SDK_INT >= 17) context.applicationInfo.dataDir + "/databases/" else "/data/data/" + context.packageName + "/databases/"
@@ -109,6 +114,7 @@ class LegoDataBaseHelper(context: Context) :
         copyDataBase()
         this.readableDatabase
     }
+
 
 
 //    DATA-BASE OPERATIONS FUNCTIONS
@@ -144,6 +150,21 @@ class LegoDataBaseHelper(context: Context) :
         values.put("QuantityInStore",packageElement.getQuantityInStore())
 
         insertRowToTable("InventoriesParts",values)
+    }
+
+    fun insertImage(elementCode: String, img:ByteArray?){
+        val values = ContentValues()
+        values.put("Image",img)
+        val strFilter = "Code='$elementCode'"
+        updateRowInTable("Codes",values,strFilter)
+    }
+
+    fun insertRowIntoCodes(itemID:Int, colorID:Int, code:Int){
+        val values = ContentValues()
+        values.put("ItemID",itemID)
+        values.put("ColorID",colorID)
+        values.put("Code",code)
+        insertRowToTable("Codes",values)
     }
 
     fun performRequestToFirstInteger(query:String): Int {
@@ -216,6 +237,11 @@ class LegoDataBaseHelper(context: Context) :
         return performRequestToFirstInteger(query)
     }
 
+    fun getItemTypeCode(typeId: Int): String{
+        val query = "SELECT Code FROM ItemTypes WHERE id=$typeId"
+        return performRequestToFirstString(query)
+    }
+
     fun getCodeImage(elementCode:String): ByteArray?{
         val query = "SELECT Image FROM Codes WHERE  Code='$elementCode'"
 
@@ -241,8 +267,8 @@ class LegoDataBaseHelper(context: Context) :
         val db = this.writableDatabase
 
         val query :String
-        query = if (activeOnly) "SELECT * FROM Inventories WHERE Active=1"
-        else "SELECT * FROM Inventories"
+        query = if (activeOnly) "SELECT * FROM Inventories WHERE Active=1 ORDER BY LastAccessed desc"
+        else "SELECT * FROM Inventories ORDER BY LastAccessed desc"
 
         val cursor = db.rawQuery(query,null)
         while(cursor.moveToNext()){
@@ -264,8 +290,6 @@ class LegoDataBaseHelper(context: Context) :
         val db = this.writableDatabase
         val cursor = db.rawQuery(query,null)
 
-        var itemCode : String
-        var itemDescription : String
         while(cursor.moveToNext()){
             val ID = cursor.getInt(0)
             val projectId = cursor.getInt(1)
@@ -275,15 +299,16 @@ class LegoDataBaseHelper(context: Context) :
             val quantityInStore = cursor.getInt(5)
             val colorID = cursor.getInt(6)
             val colorCode = getColorCode(colorID)
-            val imageCode = getCodeImageCode(itemID,colorID)
-            if (ID>0){
-                itemCode = getPartCode(itemID)
-                itemDescription = getColorName(colorID) + " " + getPartName(itemID)
-            } else {
-                itemCode = ""
-                itemDescription = "Brak klocka w bazie!"
+            var imageCode = getCodeImageCode(itemID,colorID)
+            if (imageCode==0) {
+                imageCode = "${ID}999".toInt()
+                insertRowIntoCodes(itemID,colorID,imageCode)
             }
-            val part = SinglePackageElement(ID,projectId,itemID,typeID,colorID,quantityInSet,quantityInStore, itemCode, itemDescription, colorCode, imageCode)
+            val itemCode = getPartCode(itemID)
+            val itemDescription = getColorName(colorID) + " " + getPartName(itemID)
+            val typeCode = getItemTypeCode(typeID)
+
+            val part = SinglePackageElement(ID,projectId,itemID,typeID,colorID,quantityInSet,quantityInStore, itemCode, itemDescription, colorCode, imageCode.toString(), typeCode)
             packageElements.add(part)
         }
         cursor.close()

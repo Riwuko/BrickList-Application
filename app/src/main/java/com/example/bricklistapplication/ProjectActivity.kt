@@ -1,12 +1,18 @@
 package com.example.bricklistapplication
 
 import LegoDataBaseHelper
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Environment
 import android.provider.AlarmClock
+import android.widget.Toast
 import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import kotlinx.android.synthetic.main.activity_project.*
+import java.io.File
 import java.time.LocalDateTime
 import kotlin.properties.Delegates
 
@@ -27,6 +33,34 @@ class ProjectActivity : AppCompatActivity() {
         loadProjectFields()
         updatePackageElementsListView()
         updateProjectLastAccessed()
+        exportXMLHandler()
+    }
+    fun createToast(message:String){
+        val toast = Toast.makeText(
+            applicationContext, message,
+            Toast.LENGTH_LONG
+        )
+        toast.show()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    fun exportXMLHandler(){
+        buttonGetXML.setOnClickListener {
+            val filePath: File? = this.getExternalFilesDir(null)
+            val fileName = "$projectName.xml"
+            val fullFilePath = filePath.toString() + fileName
+
+            createToast("Pobieranie...")
+            val xmlHandler = XMLHandler()
+            requestPermissions(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),1)
+            if(ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                val success = xmlHandler.exportXML(
+                    packageElementsList as ArrayList<SinglePackageElement>, fullFilePath
+                )
+                if (success) createToast("Pobrano XML: ${fullFilePath}")
+                else createToast("Nie udało się pobrać XML")
+            }
+        }
     }
 
 
