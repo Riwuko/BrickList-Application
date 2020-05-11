@@ -24,6 +24,10 @@ class LegoDataBaseHelper(context: Context) :
     private val mContext: Context
     private var mNeedUpdate = false
 
+    private lateinit var queryTable: String
+    private lateinit var queryColumn: String
+    private lateinit var queryCondition: String
+
 //    DATA-BASE LIVE FUNCTIONS
 
     @Throws(IOException::class)
@@ -110,6 +114,7 @@ class LegoDataBaseHelper(context: Context) :
         copyDataBase()
         this.readableDatabase
     }
+
 
 
 //    DATA-BASE OPERATIONS FUNCTIONS
@@ -232,6 +237,11 @@ class LegoDataBaseHelper(context: Context) :
         return performRequestToFirstInteger(query)
     }
 
+    fun getItemTypeCode(typeId: Int): String{
+        val query = "SELECT Code FROM ItemTypes WHERE id=$typeId"
+        return performRequestToFirstString(query)
+    }
+
     fun getCodeImage(elementCode:String): ByteArray?{
         val query = "SELECT Image FROM Codes WHERE  Code='$elementCode'"
 
@@ -296,8 +306,9 @@ class LegoDataBaseHelper(context: Context) :
             }
             val itemCode = getPartCode(itemID)
             val itemDescription = getColorName(colorID) + " " + getPartName(itemID)
+            val typeCode = getItemTypeCode(typeID)
 
-            val part = SinglePackageElement(ID,projectId,itemID,typeID,colorID,quantityInSet,quantityInStore, itemCode, itemDescription, colorCode, imageCode.toString())
+            val part = SinglePackageElement(ID,projectId,itemID,typeID,colorID,quantityInSet,quantityInStore, itemCode, itemDescription, colorCode, imageCode.toString(), typeCode)
             packageElements.add(part)
         }
         cursor.close()

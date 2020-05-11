@@ -6,7 +6,7 @@ class SinglePackageElement(
     elementColorID:Int,
     elementQuantityInSet:Int,
     elementQuantityInStore:Int, elementCode: String,
-    elementDescription:String, colorCode: Int?, imageCode: String
+    elementDescription:String, colorCode: Int?, imageCode: String, typeCode:String
 ){
     private val id: Int? = id
     private val InventoryID: Int? = projectID
@@ -18,7 +18,8 @@ class SinglePackageElement(
     private var elementCode: String? = setElementCode(elementCode)
     private var elementDescription: String? = setElementDescription(elementDescription)
     private var elementColorCode:String? = colorCode.toString()
-    private var elementImageCode:String? = imageCode.toString()
+    private var elementImageCode:String? = imageCode
+    private var TypeCode: String? = typeCode
 
     fun getID():Int?{
         return id
@@ -62,6 +63,10 @@ class SinglePackageElement(
 
     fun getElementImageCode():String?{
         return elementImageCode
+    }
+
+    fun getElementTypeCode():String?{
+        return TypeCode
     }
 
     fun setQuantityInStore(value:Int){
