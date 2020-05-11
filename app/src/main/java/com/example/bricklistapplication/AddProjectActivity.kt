@@ -33,6 +33,7 @@ class AddProjectActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun addNewProject() {
         if(getInputValues()) {
             val fileUrl = usingPrefix + choosenId + ".xml"

@@ -168,19 +168,41 @@ class LegoDataBaseHelper(context: Context) :
         return performRequestToFirstInteger(query)
     }
 
-    fun getBrickID(elementID:String): Int {
-        val query = "SELECT id FROM Parts WHERE  Code='$elementID'"
+    fun getBrickID(code:String): Int {
+        val query = "SELECT id FROM Parts WHERE  Code='$code'"
         return performRequestToFirstInteger(query)
     }
+
+    fun getItemCode(elementID: Int): String {
+        val query = "SELECT Code FROM Parts WHERE id=$elementID"
+        return performRequestToFirstString(query)
+    }
+
+    fun getPartName(elementID: Int): String{
+        val query = "SELECT Name FROM Parts WHERE id=$elementID"
+        return performRequestToFirstString(query)
+    }
+
+
+    fun getColorID(elementColor:String): Int {
+        val query = "SELECT id FROM Colors WHERE Code='$elementColor'"
+        return performRequestToFirstInteger(query)
+    }
+
+    fun getColorName(colorID: Int): String{
+        val query = "SELECT Name FROM Colors WHERE id=$colorID"
+        return performRequestToFirstString(query)
+    }
+
 
     fun getBrickTypeID(elementType:String):Int{
         val query = "SELECT id FROM ItemTypes WHERE Code='$elementType'"
         return performRequestToFirstInteger(query)
     }
 
-    fun getColorID(elementColor:String): Int {
-        val query = "SELECT id FROM Colors WHERE Code='$elementColor'"
-        return performRequestToFirstInteger(query)
+    fun getItemTypeName(elementID: Int):String{
+        val query = "SELECT Name FROM ItemTypes WHERE id=$elementID"
+        return performRequestToFirstString(query)
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -205,8 +227,27 @@ class LegoDataBaseHelper(context: Context) :
         return projects
     }
 
-    fun Int.toBoolean() = if (this==1) true else false
-    fun Boolean.toInt() = if (this) 1 else 0
+    fun getPackageElements(projectID: Int): MutableList<SinglePackageElement> {
+        val packageElements = mutableListOf<SinglePackageElement>()
+        val query = "SELECT * FROM InventoriesParts WHERE InventoryID=$projectID"
+
+        val db = this.writableDatabase
+        val cursor = db.rawQuery(query,null)
+
+        while(cursor.moveToNext()){
+            val projectID = cursor.getInt(1)
+            val itemID = cursor.getInt(3)
+            val typeID = cursor.getInt(2)
+            val quantityInSet = cursor.getInt(4)
+            val quantityInStore = cursor.getInt(5)
+            val colorID = cursor.getInt(6)
+
+            val part = SinglePackageElement(projectID,itemID,typeID,colorID,quantityInSet,quantityInStore)
+            packageElements.add(part)
+        }
+        cursor.close()
+        return packageElements
+    }
 
     fun activateProject(isActive:Boolean,projectID:Int){
         val values = ContentValues()
@@ -216,4 +257,10 @@ class LegoDataBaseHelper(context: Context) :
         db.update("Inventories",values,strFilter,null)
         db.close()
     }
+
+
+
+
+    fun Int.toBoolean() = if (this==1) true else false
+    fun Boolean.toInt() = if (this) 1 else 0
 }
