@@ -35,7 +35,6 @@ class ProjectsListAdapter(context: Context?, resource: Int, objects: MutableList
             checkBox.isChecked=false
             if(this.activeOnly) dataSource!!.remove(project)
         }
-
         checkBox.setOnClickListener {
             if(checkBox.isChecked){
                 legoDataBaseHelper?.updateProjectActivation(true,project.getId()!!.toInt())

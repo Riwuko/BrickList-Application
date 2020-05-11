@@ -6,7 +6,7 @@ class SinglePackageElement(
     elementColorID:Int,
     elementQuantityInSet:Int,
     elementQuantityInStore:Int, elementCode: String,
-    elementDescription:String, colorCode: Int?, imageCode:Int?
+    elementDescription:String, colorCode: Int?, imageCode: String
 ){
     private val id: Int? = id
     private val InventoryID: Int? = projectID
@@ -15,8 +15,8 @@ class SinglePackageElement(
     private val ColorID: Int? = elementColorID
     private val elementQuantityInSet: Int? = elementQuantityInSet
     private var elementQuantityInStore: Int? = elementQuantityInStore
-    private var elementCode: String? = elementCode
-    private var elementDescription: String? = elementDescription
+    private var elementCode: String? = setElementCode(elementCode)
+    private var elementDescription: String? = setElementDescription(elementDescription)
     private var elementColorCode:String? = colorCode.toString()
     private var elementImageCode:String? = imageCode.toString()
 
@@ -68,7 +68,22 @@ class SinglePackageElement(
         elementQuantityInStore = value
     }
 
+    fun setElementCode(value:String): String? {
+        if (ItemID!!.toInt()==0){
+            return ""
+        }
+        return value
+    }
+
+    fun setElementDescription(value:String): String? {
+        if (ItemID!!.toInt()==0){
+            return "Brak klocka w bazie!"
+        }
+        return value
+    }
+
     override fun toString(): String {
         return "$elementCode $elementDescription $ItemID $ColorID"
     }
+
 }

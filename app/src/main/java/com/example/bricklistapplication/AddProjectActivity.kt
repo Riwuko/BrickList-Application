@@ -74,14 +74,16 @@ class AddProjectActivity : AppCompatActivity() {
 
             val id = LegoDataBaseHelper?.generatePackageElementID()
             val TypeID = LegoDataBaseHelper?.getItemTypeID(brickItemType)
-            val ColorID = LegoDataBaseHelper?.getColorID(brickColor)
+            val ColorID = LegoDataBaseHelper?.getColorID(brickColor)!!
             val ItemID = LegoDataBaseHelper?.getPartID(ItemCode)
-//            val PartCode = LegoDataBaseHelper?.getPartCode(id!!)
-            val PartCode = ItemCode
             val PartDescription = LegoDataBaseHelper!!.getColorName(ColorID!!) + " " +
-                    LegoDataBaseHelper!!.getPartName(id!!)
+                        LegoDataBaseHelper!!.getPartName(id!!)
             val ColorCode = LegoDataBaseHelper?.getColorCode(ColorID)!!
-            val ImageCode = LegoDataBaseHelper?.getCodeImageCode(ItemID!!,ColorID)
+            var ImageCode = LegoDataBaseHelper?.getCodeImageCode(ItemID!!,ColorID)
+            if (ImageCode!!.toInt()==0) {
+                ImageCode = "${id}999".toInt()
+                LegoDataBaseHelper!!.insertRowIntoCodes(ItemID!!,ColorID,ImageCode.toInt())
+            }
             try {
                 val packageElement = SinglePackageElement(
                     id,
@@ -91,10 +93,10 @@ class AddProjectActivity : AppCompatActivity() {
                     ColorID.toInt(),
                     brickQuantityInSet,
                     brickQuantityInStore,
-                    PartCode,
+                    ItemCode,
                     PartDescription,
                     ColorCode,
-                    ImageCode
+                    ImageCode.toString()
                 )
                 LegoDataBaseHelper?.insertPackageElement(packageElement)
                 LegoDataBaseHelper?.close()
