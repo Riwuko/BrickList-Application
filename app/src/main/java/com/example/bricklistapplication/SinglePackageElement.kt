@@ -6,36 +6,38 @@ class SinglePackageElement(
     elementColorID:Int,
     elementQuantityInSet:Int,
     elementQuantityInStore:Int, elementCode: String,
-    elementDescription:String){
-    private val ID: Int? = id
-    private val projectID: Int? = projectID
-    private val elementID: Int? = elementID
-    private val elementTypeID: Int? = elementTypeID
-    private val elementColorID: Int? = elementColorID
+    elementDescription:String, colorCode: Int?, imageCode:Int?
+){
+    private val id: Int? = id
+    private val InventoryID: Int? = projectID
+    private val TypeID: Int? = elementTypeID
+    private val ItemID: Int? = elementID
+    private val ColorID: Int? = elementColorID
     private val elementQuantityInSet: Int? = elementQuantityInSet
     private var elementQuantityInStore: Int? = elementQuantityInStore
     private var elementCode: String? = elementCode
     private var elementDescription: String? = elementDescription
-
+    private var elementColorCode:String? = colorCode.toString()
+    private var elementImageCode:String? = imageCode.toString()
 
     fun getID():Int?{
-        return ID
+        return id
     }
 
     fun getProjectID(): Int? {
-        return projectID
+        return InventoryID
     }
 
     fun getElementID(): Int? {
-        return elementID
+        return ItemID
     }
 
     fun getElementTypeID(): Int? {
-        return elementTypeID
+        return TypeID
     }
 
     fun getElementColorID(): Int? {
-        return elementColorID
+        return ColorID
     }
 
     fun getQuantityInSet(): Int? {
@@ -54,11 +56,19 @@ class SinglePackageElement(
         return elementDescription
     }
 
+    fun getElementColorCode():String?{
+        return elementColorCode
+    }
+
+    fun getElementImageCode():String?{
+        return elementImageCode
+    }
+
     fun setQuantityInStore(value:Int){
         elementQuantityInStore = value
     }
 
     override fun toString(): String {
-        return "$elementCode $elementDescription $elementID $elementColorID"
+        return "$elementCode $elementDescription $ItemID $ColorID"
     }
 }

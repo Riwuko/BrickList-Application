@@ -37,7 +37,7 @@ class DownloadTask() {
                 }
 
                 println("pathname to $downloadedFilePath$downloadFileName")
-                input = connection.getInputStream()
+                input = connection.inputStream
                 output = FileOutputStream(downloadedFilePath+downloadFileName)
                 println("output file to $output")
                 println(input)

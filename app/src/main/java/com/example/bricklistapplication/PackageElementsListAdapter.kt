@@ -4,7 +4,6 @@ import LegoDataBaseHelper
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.BitmapFactory
-import android.os.Build
 import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
@@ -13,7 +12,6 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.annotation.RequiresApi
 
 class PackageElementsListAdapter(context: Context?, resource: Int, objects: MutableList<SinglePackageElement>) : ArrayAdapter<SinglePackageElement>(
     context!!, resource, objects as MutableList<SinglePackageElement>) {
@@ -60,19 +58,15 @@ class PackageElementsListAdapter(context: Context?, resource: Int, objects: Muta
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
-    fun loadImageUrlsList(brickID: Int?, colorID: Int?, brickCode:String){
+    fun loadImageUrlsList(imageCode: String?, colorCode: String?, partCode:String){
         val base1 = "https://www.lego.com/service/bricks/5/2/"
         val base2 = "http://img.bricklink.com/P/"
         val base3 = "https://www.bricklink.com/PL/"
         imageUrlsList.clear()
-        imageUrlsList.add(base1 + brickCode)
-        imageUrlsList.add(base2 + colorID + '/' + brickCode + ".gif")
-        imageUrlsList.add(base3 + brickCode + ".jpg")
-        System.lineSeparator()
+        imageUrlsList.add(base1 + imageCode)
+        imageUrlsList.add(base2 + colorCode + '/' + partCode + ".gif")
+        imageUrlsList.add(base3 + partCode + ".jpg")
         print(imageUrlsList)
-        System.lineSeparator()
-        System.lineSeparator()
     }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
@@ -95,15 +89,13 @@ class PackageElementsListAdapter(context: Context?, resource: Int, objects: Muta
         return retView
     }
 
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
     fun getElementImage(position: Int): ByteArray? {
         val element = getItem(position)!!
-        val code = legoDataBaseHelper!!.getCodeImageCode(element.getElementID()!!,element.getElementColorID()!!)
-        val photo = legoDataBaseHelper!!.getCodeImage(code)
+        val photo = legoDataBaseHelper!!.getCodeImage(element.getElementImageCode()!!)
         val name = getItem(position)!!.getElementCode()
         if(photo==null) run {
-            loadImageUrlsList(element.getElementID(),element.getElementColorID(),name!!)
-            val downloadTask: DownloadTask = DownloadTask()
+            loadImageUrlsList(element.getElementImageCode(),element.getElementColorCode(),name!!)
+            val downloadTask = DownloadTask()
             return downloadTask.downloadImage(imageUrlsList)
         }
         return null
@@ -113,7 +105,6 @@ class PackageElementsListAdapter(context: Context?, resource: Int, objects: Muta
         legoDataBaseHelper = LegoDataBaseHelper(adapterContext!!)
     }
 
-    @RequiresApi(Build.VERSION_CODES.KITKAT)
     @SuppressLint("SetTextI18n")
     fun setAdapterFields(position: Int, retView: View) {
         val element = getItem(position)!!
@@ -129,8 +120,6 @@ class PackageElementsListAdapter(context: Context?, resource: Int, objects: Muta
         legoDesText.text = element.getElementDescription()
 
         println(element.toString())
-        System.lineSeparator()
-        System.lineSeparator()
         val image = getElementImage(position)
         val bm = BitmapFactory.decodeByteArray(image, 0, image!!.size)
         val dm = DisplayMetrics()
@@ -145,7 +134,5 @@ class PackageElementsListAdapter(context: Context?, resource: Int, objects: Muta
         val amountInSet = getItem(position)!!.getQuantityInSet().toString()
         legoAmount.text = "$amountInStore/$amountInSet"
     }
-
-
 
 }

@@ -135,6 +135,7 @@ class LegoDataBaseHelper(context: Context) :
 
     fun insertPackageElement(packageElement: SinglePackageElement){
         val values = ContentValues()
+        values.put("id",packageElement.getID())
         values.put("InventoryID",packageElement.getProjectID())
         values.put("ItemID",packageElement.getElementID())
         values.put("TypeID",packageElement.getElementTypeID())
@@ -171,12 +172,12 @@ class LegoDataBaseHelper(context: Context) :
 
     fun generateProjectID(): Int {
         val query = "SELECT id FROM Inventories WHERE id = (SELECT MAX(id)  FROM Inventories)"
-        return performRequestToFirstInteger(query)
+        return performRequestToFirstInteger(query)+1
     }
 
     fun generatePackageElementID(): Int {
         val query = "SELECT id FROM InventoriesParts WHERE id = (SELECT MAX(id)  FROM InventoriesParts)"
-        return performRequestToFirstInteger(query)
+        return performRequestToFirstInteger(query)+1
     }
 
     fun getPartID(code:String): Int {
@@ -205,18 +206,17 @@ class LegoDataBaseHelper(context: Context) :
         return performRequestToFirstString(query)
     }
 
+    fun getColorCode(elementID:Int):Int{
+        val query = "SELECT Code FROM Colors WHERE id=$elementID"
+        return performRequestToFirstInteger(query)
+    }
 
     fun getItemTypeID(elementType:String):Int{
         val query = "SELECT id FROM ItemTypes WHERE Code='$elementType'"
         return performRequestToFirstInteger(query)
     }
 
-    fun getItemTypeName(elementID: Int):String{
-        val query = "SELECT Name FROM ItemTypes WHERE id=$elementID"
-        return performRequestToFirstString(query)
-    }
-
-    fun getCodeImage(elementCode:Int): ByteArray?{
+    fun getCodeImage(elementCode:String): ByteArray?{
         val query = "SELECT Image FROM Codes WHERE  Code='$elementCode'"
 
         var img : ByteArray? = null
@@ -240,7 +240,7 @@ class LegoDataBaseHelper(context: Context) :
         val projects = mutableListOf<Project>()
         val db = this.writableDatabase
 
-        var query = ""
+        val query :String
         query = if (activeOnly) "SELECT * FROM Inventories WHERE Active=1"
         else "SELECT * FROM Inventories"
 
@@ -264,16 +264,18 @@ class LegoDataBaseHelper(context: Context) :
         val db = this.writableDatabase
         val cursor = db.rawQuery(query,null)
 
-        var itemCode = ""
-        var itemDescription = ""
+        var itemCode : String
+        var itemDescription : String
         while(cursor.moveToNext()){
             val ID = cursor.getInt(0)
-            val projectID = cursor.getInt(1)
+            val projectId = cursor.getInt(1)
             val itemID = cursor.getInt(3)
             val typeID = cursor.getInt(2)
             val quantityInSet = cursor.getInt(4)
             val quantityInStore = cursor.getInt(5)
             val colorID = cursor.getInt(6)
+            val colorCode = getColorCode(colorID)
+            val imageCode = getCodeImageCode(itemID,colorID)
             if (ID>0){
                 itemCode = getPartCode(itemID)
                 itemDescription = getColorName(colorID) + " " + getPartName(itemID)
@@ -281,7 +283,7 @@ class LegoDataBaseHelper(context: Context) :
                 itemCode = ""
                 itemDescription = "Brak klocka w bazie!"
             }
-            val part = SinglePackageElement(ID,projectID,itemID,typeID,colorID,quantityInSet,quantityInStore, itemCode, itemDescription)
+            val part = SinglePackageElement(ID,projectId,itemID,typeID,colorID,quantityInSet,quantityInStore, itemCode, itemDescription, colorCode, imageCode)
             packageElements.add(part)
         }
         cursor.close()
@@ -308,14 +310,7 @@ class LegoDataBaseHelper(context: Context) :
         val strFilter = "id=$elementID"
         updateRowInTable("Inventories",values,strFilter)
 }
-
-    fun updateCodeImage(elementCode:Int,img:ByteArray?){
-        val values = ContentValues()
-        values.put("Image",img)
-        val strFilter = "Code='$elementCode'"
-        updateRowInTable("Codes",values,strFilter)
-    }
-
+    
     fun Int.toBoolean() = if (this==1) true else false
     fun Boolean.toInt() = if (this) 1 else 0
 }
