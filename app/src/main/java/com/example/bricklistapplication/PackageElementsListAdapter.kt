@@ -3,54 +3,79 @@ package com.example.bricklistapplication
 import LegoDataBaseHelper
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.BitmapFactory
+import android.os.Build
+import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.RequiresApi
 
 class PackageElementsListAdapter(context: Context?, resource: Int, objects: MutableList<SinglePackageElement>) : ArrayAdapter<SinglePackageElement>(
     context!!, resource, objects as MutableList<SinglePackageElement>) {
 
     private var adapterContext: Context? = context
     private var adapterLayout: Int = resource
-    private val inflater: LayoutInflater =
-        adapterContext?.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+    private val inflater: LayoutInflater = adapterContext?.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
     private var legoDataBaseHelper: LegoDataBaseHelper? = null
 
     private lateinit var legoAmount: TextView
     private lateinit var legoDesText: TextView
     private lateinit var legoNameText: TextView
+    private lateinit var legoImage: ImageView
 
-    fun loadDataBase() {
-        legoDataBaseHelper = LegoDataBaseHelper(adapterContext!!)
+    private var imageUrlsList: ArrayList<String> = ArrayList()
+
+    fun buttonHandler(button: Button, position: Int, operation:String) {
+        loadDataBase()
+        button.setOnClickListener {
+            changeAmountValue(operation, position)
+            updateAmountField(position)
+            notifyDataSetChanged()
+        }
     }
 
-    fun getSingleElementData(position: Int): MutableMap<String, String> {
-        loadDataBase()
-        val data = mutableMapOf<String, String>()
-        val singleElement = getItem(position)
-
-        if(singleElement?.getElementID()!!>0) {
-            data.put("brickName", legoDataBaseHelper!!.getPartCode(getItem(position)!!.getElementID()!!))
-            data.put("brickDescription", legoDataBaseHelper!!.getColorName(getItem(position)!!.getElementColorID()!!) + " " +
-                    legoDataBaseHelper!!.getPartName(getItem(position)!!.getElementID()!!) )
+    fun changeAmountValue(operation: String, position: Int) {
+        val element=getItem(position)!!
+        var value:Int = element.getQuantityInStore()!!.toInt()
+        var success: Boolean = false
+        if (operation=="add"){
+            if ((value+1) <= element.getQuantityInSet()!!.toInt()){
+                success = true
+                value += 1
+            }
+        }else if (operation=="subtract"){
+            if ((value-1) >= 0) {
+                success = true
+                value -=1
+            }
         }
-        else{
-            data.put("brickName", "Brak klocka w bazie")
-            data.put("brickDescription", "")
+        if (success){
+            legoDataBaseHelper!!.updateQuantityInStore(getItem(position)!!.getID()!!, value)
+            getItem(position)!!.setQuantityInStore(value)
         }
-        data.put("brickId", getItem(position)!!.getElementID().toString())
-        data.put("quantityInStore", getItem(position)!!.getQuantityInStore().toString())
-        data.put("quantityInSet", getItem(position)!!.getQuantityInSet().toString())
-        data.put("projectID",getItem(position)!!.getProjectID().toString())
+    }
 
-        return data
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
+    fun loadImageUrlsList(brickID: Int?, colorID: Int?, brickCode:String){
+        val base1 = "https://www.lego.com/service/bricks/5/2/"
+        val base2 = "http://img.bricklink.com/P/"
+        val base3 = "https://www.bricklink.com/PL/"
+        imageUrlsList.clear()
+        imageUrlsList.add(base1 + brickCode)
+        imageUrlsList.add(base2 + colorID + '/' + brickCode + ".gif")
+        imageUrlsList.add(base3 + brickCode + ".jpg")
+        System.lineSeparator()
+        print(imageUrlsList)
+        System.lineSeparator()
+        System.lineSeparator()
     }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-
         val retView: View
 
         if (convertView == null) {
@@ -70,13 +95,48 @@ class PackageElementsListAdapter(context: Context?, resource: Int, objects: Muta
         return retView
     }
 
-    fun buttonHandler(button: Button, position: Int, operation:String) {
-        loadDataBase()
-        button.setOnClickListener {
-            changeAmountValue(operation, position)
-            updateAmountField(position)
-            notifyDataSetChanged()
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
+    fun getElementImage(position: Int): ByteArray? {
+        val element = getItem(position)!!
+        val code = legoDataBaseHelper!!.getCodeImageCode(element.getElementID()!!,element.getElementColorID()!!)
+        val photo = legoDataBaseHelper!!.getCodeImage(code)
+        val name = getItem(position)!!.getElementCode()
+        if(photo==null) run {
+            loadImageUrlsList(element.getElementID(),element.getElementColorID(),name!!)
+            val downloadTask: DownloadTask = DownloadTask()
+            return downloadTask.downloadImage(imageUrlsList)
         }
+        return null
+    }
+
+    fun loadDataBase() {
+        legoDataBaseHelper = LegoDataBaseHelper(adapterContext!!)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.KITKAT)
+    @SuppressLint("SetTextI18n")
+    fun setAdapterFields(position: Int, retView: View) {
+        val element = getItem(position)!!
+        legoNameText = retView.findViewById<TextView>(R.id.textViewLegoName)
+        legoDesText = retView.findViewById<TextView>(R.id.textViewLegoDes)
+        legoAmount = retView.findViewById<TextView>(R.id.textViewLegoAmount)
+        legoImage= retView.findViewById<ImageView>(R.id.imageViewLegoPicture)
+
+        val amountInStore = element.getQuantityInStore().toString()
+        val amountInSet = element.getQuantityInSet().toString()
+        legoAmount.text = "$amountInStore/$amountInSet"
+        legoNameText.text = element.getElementCode()
+        legoDesText.text = element.getElementDescription()
+
+        println(element.toString())
+        System.lineSeparator()
+        System.lineSeparator()
+        val image = getElementImage(position)
+        val bm = BitmapFactory.decodeByteArray(image, 0, image!!.size)
+        val dm = DisplayMetrics()
+        legoImage.minimumHeight = dm.heightPixels
+        legoImage.minimumWidth = dm.widthPixels
+        legoImage.setImageBitmap(bm)
     }
 
     @SuppressLint("SetTextI18n")
@@ -86,39 +146,6 @@ class PackageElementsListAdapter(context: Context?, resource: Int, objects: Muta
         legoAmount.text = "$amountInStore/$amountInSet"
     }
 
-    fun changeAmountValue(operation: String, position: Int) {
-        val element = getSingleElementData(position)
-        var value:Int = element["quantityInStore"]!!.toInt()
-        var success: Boolean = false
-        if (operation=="add"){
-            if ((value+1) <= element["quantityInSet"]!!.toInt()){
-                success = true
-                value += 1
-            }
-        }else if (operation=="subtract"){
-            if ((value-1) >= 0) {
-                success = true
-                value -=1
-            }
-        }
-        if (success){
-            legoDataBaseHelper!!.updateQuantityInStore(getItem(position)!!.getID()!!, value)
-            getItem(position)!!.setQuantityInStore(value)
-        }
-    }
 
-    @SuppressLint("SetTextI18n")
-    fun setAdapterFields(position: Int, retView: View) {
-        val element = getSingleElementData(position)
-        legoNameText = retView.findViewById<TextView>(R.id.textViewLegoName)
-        legoDesText = retView.findViewById<TextView>(R.id.textViewLegoDes)
-        legoAmount = retView.findViewById<TextView>(R.id.textViewLegoAmount)
-
-        legoNameText.text = element["brickName"]
-        legoDesText.text = element["brickDescription"]
-        val amountInStore = element["quantityInStore"].toString()
-        val amountInSet = element["quantityInSet"].toString()
-        legoAmount.text = "$amountInStore/$amountInSet"
-    }
 
 }

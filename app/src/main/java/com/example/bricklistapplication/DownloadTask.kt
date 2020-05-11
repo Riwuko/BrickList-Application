@@ -1,17 +1,21 @@
 package com.example.bricklistapplication
 
 import android.webkit.URLUtil
-import java.io.FileOutputStream
-import java.io.InputStream
-import java.io.OutputStream
+import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
 
 
-class DownloadTask(downloadUrl: String, fileName: String, filePath: String) {
-    private var downloadUrl: String? = downloadUrl
-    private var downloadedFilePath : String? = filePath
-    private var downloadFileName : String? = fileName
+class DownloadTask() {
+    private var downloadUrl: String? = null
+    private var downloadedFilePath : String? = null
+    private var downloadFileName : String? = null
+
+    constructor(url: String, fileName: String, filePath: String) : this() {
+        downloadUrl = url
+        downloadedFilePath = filePath
+        downloadFileName = fileName
+    }
 
     fun downloadFromURL() : Boolean
     {
@@ -58,5 +62,37 @@ class DownloadTask(downloadUrl: String, fileName: String, filePath: String) {
         thread.join()
         return success
 
+    }
+
+    fun urlConnect(url:URL): HttpURLConnection {
+        var connection = url.openConnection() as HttpURLConnection
+        connection.requestMethod = "GET"
+        connection.connect()
+        return connection
+    }
+
+    fun downloadImage(urlList:ArrayList<String>):ByteArray? {
+        var image : ByteArray? = null
+        var connection : HttpURLConnection? = null
+        val thread = Thread(Runnable {
+            for (url in urlList) {
+               connection = urlConnect(URL(url))
+                if (connection!!.responseCode == HttpURLConnection.HTTP_OK) {
+                    break
+                } else image = null
+            }
+            val inputStream = BufferedInputStream(connection!!.inputStream)
+            val outputStream = ByteArrayOutputStream();
+            val data = ByteArray(50)
+            var current = inputStream.read(data)
+            while (current != -1) {
+                outputStream.write(data, 0, current)
+                current = inputStream.read(data)
+            }
+            image = outputStream.toByteArray()
+            })
+            thread.start()
+            thread.join()
+        return image
     }
 }

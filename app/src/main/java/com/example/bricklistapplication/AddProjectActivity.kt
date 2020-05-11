@@ -21,6 +21,7 @@ class AddProjectActivity : AppCompatActivity() {
     private var projectName: String? = null
     private var LegoDataBaseHelper: LegoDataBaseHelper? = null
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_project)
@@ -70,16 +71,21 @@ class AddProjectActivity : AppCompatActivity() {
             val brickTypeID = LegoDataBaseHelper?.getItemTypeID(brickItemType)
             val brickColorID = LegoDataBaseHelper?.getColorID(brickColor)
             val brickID = LegoDataBaseHelper?.getPartID(brickItemId)
+            val brickCode = LegoDataBaseHelper?.getPartCode(elementID!!)
+            val brickDescription = LegoDataBaseHelper!!.getColorName(brickColorID!!) + " " +
+                    LegoDataBaseHelper!!.getPartName(elementID!!)
 
             try {
                 val packageElement = SinglePackageElement(
-                    elementID!!,
+                    elementID,
                     projectID,
                     brickID!!.toInt(),
                     brickTypeID!!.toInt(),
-                    brickColorID!!.toInt(),
+                    brickColorID.toInt(),
                     brickQuantityInSet,
-                    brickQuantityInStore
+                    brickQuantityInStore,
+                    brickCode!!,
+                    brickDescription
                 )
                 LegoDataBaseHelper?.insertPackageElement(packageElement)
                 LegoDataBaseHelper?.close()

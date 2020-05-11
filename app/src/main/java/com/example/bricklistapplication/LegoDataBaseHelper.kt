@@ -119,6 +119,12 @@ class LegoDataBaseHelper(context: Context) :
         db.close()
     }
 
+    fun updateRowInTable(table:String,values: ContentValues,strFilter:String){
+        val db = this.writableDatabase
+        db.update(table,values,strFilter,null)
+        db.close()
+    }
+
     fun insertProject(project:Project){
         val values = ContentValues()
         values.put("Name",project.getName())
@@ -210,6 +216,25 @@ class LegoDataBaseHelper(context: Context) :
         return performRequestToFirstString(query)
     }
 
+    fun getCodeImage(elementCode:Int): ByteArray?{
+        val query = "SELECT Image FROM Codes WHERE  Code='$elementCode'"
+
+        var img : ByteArray? = null
+        val db = this.writableDatabase
+        val cursor = db.rawQuery(query,null)
+        if(cursor.moveToFirst()){
+            img = cursor.getBlob(0)
+            cursor.close()
+        }
+        return img
+    }
+
+    fun getCodeImageCode(itemID:Int,colorID:Int):Int{
+        val query = "SELECT Code FROM Codes WHERE ItemID=$itemID AND ColorID=$colorID"
+        return performRequestToFirstInteger(query)
+    }
+
+
     @RequiresApi(Build.VERSION_CODES.O)
     fun getProjects(activeOnly: Boolean) : MutableList<Project>{
         val projects = mutableListOf<Project>()
@@ -239,6 +264,8 @@ class LegoDataBaseHelper(context: Context) :
         val db = this.writableDatabase
         val cursor = db.rawQuery(query,null)
 
+        var itemCode = ""
+        var itemDescription = ""
         while(cursor.moveToNext()){
             val ID = cursor.getInt(0)
             val projectID = cursor.getInt(1)
@@ -247,34 +274,47 @@ class LegoDataBaseHelper(context: Context) :
             val quantityInSet = cursor.getInt(4)
             val quantityInStore = cursor.getInt(5)
             val colorID = cursor.getInt(6)
-
-            val part = SinglePackageElement(ID,projectID,itemID,typeID,colorID,quantityInSet,quantityInStore)
+            if (ID>0){
+                itemCode = getPartCode(itemID)
+                itemDescription = getColorName(colorID) + " " + getPartName(itemID)
+            } else {
+                itemCode = ""
+                itemDescription = "Brak klocka w bazie!"
+            }
+            val part = SinglePackageElement(ID,projectID,itemID,typeID,colorID,quantityInSet,quantityInStore, itemCode, itemDescription)
             packageElements.add(part)
         }
         cursor.close()
         return packageElements
     }
 
-    fun activateProject(isActive:Boolean,projectID:Int){
+    fun updateProjectActivation(isActive:Boolean, projectID:Int){
         val values = ContentValues()
         values.put("Active",isActive.toInt())
-        val db = this.writableDatabase
         val strFilter = "id=$projectID"
-        db.update("Inventories",values,strFilter,null)
-        db.close()
+        updateRowInTable("Inventories",values,strFilter)
     }
 
     fun updateQuantityInStore(elementID: Int, value: Int){
         val values = ContentValues()
         values.put("QuantityInStore",value)
-        val db = this.writableDatabase
         val strFilter = "id=$elementID"
-        db.update("InventoriesParts",values,strFilter,null)
-        db.close()
+        updateRowInTable("InventoriesParts",values,strFilter)
     }
 
+    fun updateLastAccess(elementID:Int, time: String){
+        val values = ContentValues()
+        values.put("LastAccessed",time)
+        val strFilter = "id=$elementID"
+        updateRowInTable("Inventories",values,strFilter)
+}
 
-
+    fun updateCodeImage(elementCode:Int,img:ByteArray?){
+        val values = ContentValues()
+        values.put("Image",img)
+        val strFilter = "Code='$elementCode'"
+        updateRowInTable("Codes",values,strFilter)
+    }
 
     fun Int.toBoolean() = if (this==1) true else false
     fun Boolean.toInt() = if (this) 1 else 0
