@@ -267,8 +267,8 @@ class LegoDataBaseHelper(context: Context) :
         val db = this.writableDatabase
 
         val query :String
-        query = if (activeOnly) "SELECT * FROM Inventories WHERE Active=1"
-        else "SELECT * FROM Inventories"
+        query = if (activeOnly) "SELECT * FROM Inventories WHERE Active=1 ORDER BY LastAccessed desc"
+        else "SELECT * FROM Inventories ORDER BY LastAccessed desc"
 
         val cursor = db.rawQuery(query,null)
         while(cursor.moveToNext()){

@@ -40,7 +40,7 @@ class AddProjectActivity : AppCompatActivity() {
         if(getInputValues()) {
             val fileUrl = usingPrefix + choosenId + ".xml"
             val filePath: File? = this.getExternalFilesDir(null)
-            val fileName = choosenId.toString() + ".xml"
+            val fileName = choosenId.toString() + projectName+ ".xml"
             val fullFilePath = filePath.toString() + fileName
 
             if (downloadFile(fileUrl, fileName, filePath.toString())) {
