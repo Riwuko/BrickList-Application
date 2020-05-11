@@ -3,4 +3,9 @@
     <color name="colorPrimary">#4CAF50</color>
     <color name="colorPrimaryDark">#234f25</color>
     <color name="colorAccent">#4CAF50</color>
+
+<!--    Switch colors-->
+    <color name="disabled_foreground_grey">#4CAF50</color>
+    <color name="disabled_thumb_grey">#1c000000</color>
+    <color name="enable_thumb_green">#42221f1f</color>
 </resources>

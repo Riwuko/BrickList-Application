@@ -3,15 +3,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="90dp"
     android:id="@+id/row"
     android:baselineAligned="false">
-
 
         <ImageView
             android:id="@+id/imageViewLegoPicture"
             android:layout_width="match_parent"
-            android:layout_height="80dp"
+            android:layout_height="match_parent"
             android:gravity="center"
             android:layout_weight="20"
             android:textAlignment="center" />
@@ -19,40 +18,66 @@
         <TextView
             android:id="@+id/textViewLegoName"
             android:layout_width="match_parent"
-            android:layout_height="80dp"
+            android:layout_height="match_parent"
             android:gravity="center"
-            android:layout_weight="20"
+            android:layout_weight="21"
             android:textAlignment="center" />
 
     <TextView
         android:id="@+id/textViewLegoDes"
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="match_parent"
         android:gravity="center"
-        android:layout_weight="20"
+        android:layout_weight="19"
         android:textAlignment="center" />
 
     <LinearLayout
-        android:orientation="horizontal"
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="20"
         android:weightSum="100">
-        <TextView
-            android:id="@+id/textViewAdd"
-            android:layout_width="match_parent"
-            android:layout_height="80dp"
-            android:gravity="center"
-            android:layout_weight="50"
-            android:textAlignment="center" />
 
         <TextView
-            android:id="@+id/textViewLegoSubstract"
+            android:id="@+id/textViewLegoAmount"
             android:layout_width="match_parent"
-            android:layout_height="80dp"
+            android:layout_height="25dp"
             android:gravity="center"
-            android:layout_weight="50"
+            android:layout_weight="20"
             android:textAlignment="center" />
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:gravity="center_vertical"
+        android:layout_weight="80"
+        android:weightSum="100">
+
+        <Button
+            android:id="@+id/buttonAddElement"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="50"
+            android:gravity="center"
+            android:text="+"
+            android:textColor="@color/colorPrimary"
+            android:textSize="24sp"
+            android:background="@android:color/transparent"
+            android:textAlignment="center" />
+
+        <Button
+            android:id="@+id/buttonSubtractElement"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="50"
+            android:gravity="center"
+            android:text="-"
+            android:textColor="@color/colorPrimary"
+            android:textSize="24sp"
+            android:background="@android:color/transparent"
+            android:textAlignment="center" />
+
+    </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>

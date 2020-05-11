@@ -35,13 +35,13 @@ class ProjectsListAdapter(context: Context?, resource: Int, objects: MutableList
 
         checkBox.setOnClickListener {
             if(checkBox.isChecked){
-                legoDataBaseHelper?.activateProject(true,project["id"]!!.toInt())
+                legoDataBaseHelper?.updateProjectActivation(true,project["id"]!!.toInt())
                 getItem(position)?.setIsActive(true)
             } else{
                 getItem(position)!!.setIsActive(false)
                 if(this.active_only)
                     dataSource!!.removeAt(position)
-                legoDataBaseHelper!!.activateProject(false,project["id"]!!.toInt())
+                legoDataBaseHelper!!.updateProjectActivation(false,project["id"]!!.toInt())
             }
             notifyDataSetChanged()
         }
@@ -50,21 +50,18 @@ class ProjectsListAdapter(context: Context?, resource: Int, objects: MutableList
     fun getProjectData(position: Int): MutableMap<String, String> {
         val data = mutableMapOf<String,String>()
         data.put("id",getItem(position)?.getId()!!.toString())
-        data.put("name",getItem(position)?.getName()!!)
         data.put("isActive",getItem(position)?.getIsActive()!!.toString())
-        data.put("lastAccessed",getItem(position)?.getLastAccessed()!!)
         return data
     }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
 
-        val project = getProjectData(position)
         val retView : View
         val nameText : TextView
         val checkBox : CheckBox
 
         if (convertView == null) {
-            val holder = Project(project["id"]!!.toInt(), project["name"]!!, project["isActive"]!!.toBoolean(),project["lastAccessed"]!!)
+            val holder = getItem(position)
             retView = inflater.inflate(adapterLayout, null)
             retView.tag = holder
         } else {
@@ -73,7 +70,7 @@ class ProjectsListAdapter(context: Context?, resource: Int, objects: MutableList
         nameText = retView.findViewById<TextView>(R.id.textViewProjectName)
         checkBox = retView.findViewById<CheckBox>(R.id.checkBoxActivate)
         checkBoxHandler(checkBox,position)
-        nameText.text = project["name"]
+        nameText.text = getItem(position)!!.getName()
         return retView
     }
 

@@ -24,7 +24,7 @@ class MainActivity : AppCompatActivity() {
 
         loadApplicationSettings()
         loadDataBase()
-        updateListViewProjects()
+        updateProjectsListView()
         setButtons()
         setOnClickProject()
     }
@@ -33,8 +33,7 @@ class MainActivity : AppCompatActivity() {
     override fun onResume(){
         super.onResume()
         loadDataBase()
-        updateListViewProjects()
-
+        updateProjectsListView()
     }
 
     fun setOnClickProject(){
@@ -57,17 +56,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun loadDataBase(){
-        LegoDataBase = LegoDataBaseHelper(applicationContext)
-    }
-
     @RequiresApi(Build.VERSION_CODES.O)
-    fun updateListViewProjects(){
+    fun updateProjectsListView(){
         projectsList = LegoDataBase?.getProjects(activeOnly)!!
         val projectsListAdapter = ProjectsListAdapter(this, R.layout.projects_list_row,projectsList,activeOnly)
         listViewProjects.adapter = projectsListAdapter
     }
 
+    fun loadDataBase(){
+        LegoDataBase = LegoDataBaseHelper(applicationContext)
+    }
 
     fun loadApplicationSettings() {
         val sharedPref = getSharedPreferences("Options_prefs", 0)

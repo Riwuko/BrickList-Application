@@ -1,6 +1,7 @@
 package com.example.bricklistapplication
 
 import LegoDataBaseHelper
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -21,6 +22,7 @@ class AddProjectActivity : AppCompatActivity() {
     private var projectName: String? = null
     private var LegoDataBaseHelper: LegoDataBaseHelper? = null
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_add_project)
@@ -33,6 +35,7 @@ class AddProjectActivity : AppCompatActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     fun addNewProject() {
         if(getInputValues()) {
             val fileUrl = usingPrefix + choosenId + ".xml"
@@ -45,8 +48,12 @@ class AddProjectActivity : AppCompatActivity() {
                 createProject(packageItems)
                 createToast("Dodano projekt $projectName")
 
+                val intent = Intent(this, MainActivity::class.java)
+                startActivity(intent)
+
             } else createToast("Nie znaleziono zestawu o podanym ID!")
         }else createToast("Wprowadzono błędne dane!")
+
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -62,21 +69,32 @@ class AddProjectActivity : AppCompatActivity() {
             val brickQuantityInStore = 0
             val brickItemType = item[0]
             val brickQuantityInSet = item[1].toInt()
-            val brickItemId = item[2]
+            val ItemCode = item[2]
             val brickColor = item[3]
 
-            val brickTypeID = LegoDataBaseHelper?.getBrickTypeID(brickItemType)
-            val brickColorID = LegoDataBaseHelper?.getColorID(brickColor)
-            val brickID = LegoDataBaseHelper?.getBrickID(brickItemId)
-
+            val id = LegoDataBaseHelper?.generatePackageElementID()
+            val TypeID = LegoDataBaseHelper?.getItemTypeID(brickItemType)
+            val ColorID = LegoDataBaseHelper?.getColorID(brickColor)
+            val ItemID = LegoDataBaseHelper?.getPartID(ItemCode)
+//            val PartCode = LegoDataBaseHelper?.getPartCode(id!!)
+            val PartCode = ItemCode
+            val PartDescription = LegoDataBaseHelper!!.getColorName(ColorID!!) + " " +
+                    LegoDataBaseHelper!!.getPartName(id!!)
+            val ColorCode = LegoDataBaseHelper?.getColorCode(ColorID)!!
+            val ImageCode = LegoDataBaseHelper?.getCodeImageCode(ItemID!!,ColorID)
             try {
                 val packageElement = SinglePackageElement(
+                    id,
                     projectID,
-                    brickID!!.toInt(),
-                    brickTypeID!!.toInt(),
-                    brickColorID!!.toInt(),
+                    ItemID!!.toInt(),
+                    TypeID!!.toInt(),
+                    ColorID.toInt(),
                     brickQuantityInSet,
-                    brickQuantityInStore
+                    brickQuantityInStore,
+                    PartCode,
+                    PartDescription,
+                    ColorCode,
+                    ImageCode
                 )
                 LegoDataBaseHelper?.insertPackageElement(packageElement)
                 LegoDataBaseHelper?.close()
@@ -97,10 +115,12 @@ class AddProjectActivity : AppCompatActivity() {
     }
 
     fun getInputValues(): Boolean {
-        choosenId = editTextPackage.text.toString().toInt()
-        projectName = editTextName.text.toString()
-        if (choosenId!!.toInt() >=0 && !projectName.isNullOrEmpty() ){
-            return true
+        if (!editTextPackage.text.isNullOrEmpty() && !editTextName.text.isNullOrEmpty() ){
+            projectName = editTextName.text.toString()
+            if(editTextPackage.text.toString().toInt()>=0) {
+                choosenId = editTextPackage.text.toString().toInt()
+                return true
+            }
         }
         return false
     }
