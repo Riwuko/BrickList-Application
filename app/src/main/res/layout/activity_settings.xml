@@ -21,7 +21,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
-        android:id="@+id/editTextPackage"
+        android:id="@+id/editTextPrefix"
         android:layout_width="311dp"
         android:layout_height="56dp"
         android:layout_marginTop="24dp"
@@ -41,18 +41,30 @@
         android:theme="@style/SCBSwitch"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textViewShowInactive" />
+        app:layout_constraintTop_toBottomOf="@+id/textViewShowOnlyActive" />
 
     <TextView
-        android:id="@+id/textViewShowInactive"
+        android:id="@+id/textViewShowOnlyActive"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="Pokaż nieaktywne projekty: "
-        android:textSize="24dp"
+        android:text="Pokaż tylko aktywne projekty: "
         android:textColor="#fff"
+        android:textSize="24dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextPackage" />
+        app:layout_constraintTop_toBottomOf="@+id/editTextPrefix" />
+
+    <Button
+        android:id="@+id/buttonOK"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/round_button"
+        android:text="Ok!"
+        android:textColor="#fff"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

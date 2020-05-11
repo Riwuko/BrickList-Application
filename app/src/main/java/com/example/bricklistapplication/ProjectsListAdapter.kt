@@ -9,7 +9,7 @@ import android.widget.ArrayAdapter
 import android.widget.CheckBox
 import android.widget.TextView
 
-class ProjectsListAdapter(context: Context?, resource: Int, objects: MutableList<Project>?, var active_only: Boolean) : ArrayAdapter<Project>(
+class ProjectsListAdapter(context: Context?, resource: Int, objects: MutableList<Project>?, var activeOnly: Boolean) : ArrayAdapter<Project>(
     context!!, resource, objects as MutableList<Project>
 ) {
 
@@ -27,31 +27,28 @@ class ProjectsListAdapter(context: Context?, resource: Int, objects: MutableList
 
     fun checkBoxHandler(checkBox: CheckBox, position: Int){
         loadDataBase()
-        val project = getProjectData(position)
+        val project = getItem(position)
 
-        if (project["isActive"]!!.toBoolean()){
+        if (project!!.getIsActive()!!){
             checkBox.isChecked=true
+        }else{
+            checkBox.isChecked=false
+            if(this.activeOnly) dataSource!!.remove(project)
         }
 
         checkBox.setOnClickListener {
             if(checkBox.isChecked){
-                legoDataBaseHelper?.updateProjectActivation(true,project["id"]!!.toInt())
+                legoDataBaseHelper?.updateProjectActivation(true,project.getId()!!.toInt())
                 getItem(position)?.setIsActive(true)
             } else{
                 getItem(position)!!.setIsActive(false)
-                if(this.active_only)
-                    dataSource!!.removeAt(position)
-                legoDataBaseHelper!!.updateProjectActivation(false,project["id"]!!.toInt())
+                if(this.activeOnly)
+                    legoDataBaseHelper!!.updateProjectActivation(false,project.getId()!!.toInt())
+                    getItem(position)?.setIsActive(false)
+                    dataSource!!.remove(project)
             }
             notifyDataSetChanged()
         }
-    }
-
-    fun getProjectData(position: Int): MutableMap<String, String> {
-        val data = mutableMapOf<String,String>()
-        data.put("id",getItem(position)?.getId()!!.toString())
-        data.put("isActive",getItem(position)?.getIsActive()!!.toString())
-        return data
     }
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
@@ -68,9 +65,10 @@ class ProjectsListAdapter(context: Context?, resource: Int, objects: MutableList
             retView = convertView
         }
         nameText = retView.findViewById<TextView>(R.id.textViewProjectName)
+        nameText.text = getItem(position)!!.getName()
         checkBox = retView.findViewById<CheckBox>(R.id.checkBoxActivate)
         checkBoxHandler(checkBox,position)
-        nameText.text = getItem(position)!!.getName()
+
         return retView
     }
 
