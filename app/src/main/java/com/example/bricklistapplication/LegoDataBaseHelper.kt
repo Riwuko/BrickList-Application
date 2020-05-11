@@ -168,12 +168,17 @@ class LegoDataBaseHelper(context: Context) :
         return performRequestToFirstInteger(query)
     }
 
-    fun getBrickID(code:String): Int {
+    fun generatePackageElementID(): Int {
+        val query = "SELECT id FROM InventoriesParts WHERE id = (SELECT MAX(id)  FROM InventoriesParts)"
+        return performRequestToFirstInteger(query)
+    }
+
+    fun getPartID(code:String): Int {
         val query = "SELECT id FROM Parts WHERE  Code='$code'"
         return performRequestToFirstInteger(query)
     }
 
-    fun getItemCode(elementID: Int): String {
+    fun getPartCode(elementID: Int): String {
         val query = "SELECT Code FROM Parts WHERE id=$elementID"
         return performRequestToFirstString(query)
     }
@@ -195,7 +200,7 @@ class LegoDataBaseHelper(context: Context) :
     }
 
 
-    fun getBrickTypeID(elementType:String):Int{
+    fun getItemTypeID(elementType:String):Int{
         val query = "SELECT id FROM ItemTypes WHERE Code='$elementType'"
         return performRequestToFirstInteger(query)
     }
@@ -235,6 +240,7 @@ class LegoDataBaseHelper(context: Context) :
         val cursor = db.rawQuery(query,null)
 
         while(cursor.moveToNext()){
+            val ID = cursor.getInt(0)
             val projectID = cursor.getInt(1)
             val itemID = cursor.getInt(3)
             val typeID = cursor.getInt(2)
@@ -242,7 +248,7 @@ class LegoDataBaseHelper(context: Context) :
             val quantityInStore = cursor.getInt(5)
             val colorID = cursor.getInt(6)
 
-            val part = SinglePackageElement(projectID,itemID,typeID,colorID,quantityInSet,quantityInStore)
+            val part = SinglePackageElement(ID,projectID,itemID,typeID,colorID,quantityInSet,quantityInStore)
             packageElements.add(part)
         }
         cursor.close()
@@ -255,6 +261,15 @@ class LegoDataBaseHelper(context: Context) :
         val db = this.writableDatabase
         val strFilter = "id=$projectID"
         db.update("Inventories",values,strFilter,null)
+        db.close()
+    }
+
+    fun updateQuantityInStore(elementID: Int, value: Int){
+        val values = ContentValues()
+        values.put("QuantityInStore",value)
+        val db = this.writableDatabase
+        val strFilter = "id=$elementID"
+        db.update("InventoriesParts",values,strFilter,null)
         db.close()
     }
 

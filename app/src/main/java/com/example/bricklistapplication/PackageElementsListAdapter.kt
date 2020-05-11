@@ -19,6 +19,10 @@ class PackageElementsListAdapter(context: Context?, resource: Int, objects: Muta
         adapterContext?.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
     private var legoDataBaseHelper: LegoDataBaseHelper? = null
 
+    private lateinit var legoAmount: TextView
+    private lateinit var legoDesText: TextView
+    private lateinit var legoNameText: TextView
+
     fun loadDataBase() {
         legoDataBaseHelper = LegoDataBaseHelper(adapterContext!!)
     }
@@ -29,7 +33,7 @@ class PackageElementsListAdapter(context: Context?, resource: Int, objects: Muta
         val singleElement = getItem(position)
 
         if(singleElement?.getElementID()!!>0) {
-            data.put("brickName", legoDataBaseHelper!!.getItemCode(getItem(position)!!.getElementID()!!))
+            data.put("brickName", legoDataBaseHelper!!.getPartCode(getItem(position)!!.getElementID()!!))
             data.put("brickDescription", legoDataBaseHelper!!.getColorName(getItem(position)!!.getElementColorID()!!) + " " +
                     legoDataBaseHelper!!.getPartName(getItem(position)!!.getElementID()!!) )
         }
@@ -57,37 +61,64 @@ class PackageElementsListAdapter(context: Context?, resource: Int, objects: Muta
             retView = convertView
         }
 
-        val buttonAdd = retView.findViewById<Button>(R.id.buttonSubtractElement)
-        val buttonSubtract = retView.findViewById<Button>(R.id.buttonAddElement)
-        buttonAddHandler(buttonAdd, position)
-        buttonSubstractHandler(buttonSubtract, position)
+        val buttonAdd = retView.findViewById<Button>(R.id.buttonAddElement)
+        val buttonSubtract = retView.findViewById<Button>(R.id.buttonSubtractElement)
+        buttonHandler(buttonAdd, position,"add")
+        buttonHandler(buttonSubtract, position,"subtract")
 
-        val singleElement = getSingleElementData(position)
-        setAdapterFields(singleElement, retView)
+        setAdapterFields(position, retView)
         return retView
     }
 
+    fun buttonHandler(button: Button, position: Int, operation:String) {
+        loadDataBase()
+        button.setOnClickListener {
+            changeAmountValue(operation, position)
+            updateAmountField(position)
+            notifyDataSetChanged()
+        }
+    }
+
     @SuppressLint("SetTextI18n")
-    fun setAdapterFields(element: MutableMap<String, String>, retView: View) {
-        val legoNameText = retView.findViewById<TextView>(R.id.textViewLegoName)
-        val legoDesText = retView.findViewById<TextView>(R.id.textViewLegoDes)
-        val legoAmount = retView.findViewById<TextView>(R.id.textViewLegoAmount)
+    fun updateAmountField(position: Int){
+        val amountInStore = getItem(position)!!.getQuantityInStore().toString()
+        val amountInSet = getItem(position)!!.getQuantityInSet().toString()
+        legoAmount.text = "$amountInStore/$amountInSet"
+    }
+
+    fun changeAmountValue(operation: String, position: Int) {
+        val element = getSingleElementData(position)
+        var value:Int = element["quantityInStore"]!!.toInt()
+        var success: Boolean = false
+        if (operation=="add"){
+            if ((value+1) <= element["quantityInSet"]!!.toInt()){
+                success = true
+                value += 1
+            }
+        }else if (operation=="subtract"){
+            if ((value-1) >= 0) {
+                success = true
+                value -=1
+            }
+        }
+        if (success){
+            legoDataBaseHelper!!.updateQuantityInStore(getItem(position)!!.getID()!!, value)
+            getItem(position)!!.setQuantityInStore(value)
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    fun setAdapterFields(position: Int, retView: View) {
+        val element = getSingleElementData(position)
+        legoNameText = retView.findViewById<TextView>(R.id.textViewLegoName)
+        legoDesText = retView.findViewById<TextView>(R.id.textViewLegoDes)
+        legoAmount = retView.findViewById<TextView>(R.id.textViewLegoAmount)
 
         legoNameText.text = element["brickName"]
         legoDesText.text = element["brickDescription"]
         val amountInStore = element["quantityInStore"].toString()
         val amountInSet = element["quantityInSet"].toString()
         legoAmount.text = "$amountInStore/$amountInSet"
-    }
-
-
-    fun buttonAddHandler(button: Button, position: Int) {
-        loadDataBase()
-    }
-
-    fun buttonSubstractHandler(button: Button, position: Int) {
-        loadDataBase()
-
     }
 
 }

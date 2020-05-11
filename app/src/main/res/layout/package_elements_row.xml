@@ -60,7 +60,9 @@
             android:layout_weight="50"
             android:gravity="center"
             android:text="+"
+            android:textColor="@color/colorPrimary"
             android:textSize="24sp"
+            android:background="@android:color/transparent"
             android:textAlignment="center" />
 
         <Button
@@ -70,7 +72,9 @@
             android:layout_weight="50"
             android:gravity="center"
             android:text="-"
+            android:textColor="@color/colorPrimary"
             android:textSize="24sp"
+            android:background="@android:color/transparent"
             android:textAlignment="center" />
 
     </LinearLayout>

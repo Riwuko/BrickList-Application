@@ -1,13 +1,18 @@
 package com.example.bricklistapplication
 
-class SinglePackageElement (projectID:Int,elementID:Int, elementTypeID:Int,elementColorID:Int,elementQuantityInSet:Int,elementQuantityInStore:Int){
+class SinglePackageElement (id:Int, projectID:Int,elementID:Int, elementTypeID:Int,elementColorID:Int,elementQuantityInSet:Int,elementQuantityInStore:Int){
+    private val ID: Int? = id
     private val projectID: Int? = projectID
     private val elementID: Int? = elementID
     private val elementTypeID: Int? = elementTypeID
     private val elementColorID: Int? = elementColorID
     private val elementQuantityInSet: Int? = elementQuantityInSet
-    private val elementQuantityInStore: Int? = elementQuantityInStore
+    private var elementQuantityInStore: Int? = elementQuantityInStore
 
+
+    fun getID():Int?{
+        return ID
+    }
 
     fun getProjectID(): Int? {
         return projectID
@@ -31,5 +36,9 @@ class SinglePackageElement (projectID:Int,elementID:Int, elementTypeID:Int,eleme
 
     fun getQuantityInStore(): Int? {
         return elementQuantityInStore
+    }
+
+    fun setQuantityInStore(value:Int){
+        elementQuantityInStore = value
     }
 }

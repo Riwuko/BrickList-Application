@@ -66,12 +66,14 @@ class AddProjectActivity : AppCompatActivity() {
             val brickItemId = item[2]
             val brickColor = item[3]
 
-            val brickTypeID = LegoDataBaseHelper?.getBrickTypeID(brickItemType)
+            val elementID = LegoDataBaseHelper?.generatePackageElementID()
+            val brickTypeID = LegoDataBaseHelper?.getItemTypeID(brickItemType)
             val brickColorID = LegoDataBaseHelper?.getColorID(brickColor)
-            val brickID = LegoDataBaseHelper?.getBrickID(brickItemId)
+            val brickID = LegoDataBaseHelper?.getPartID(brickItemId)
 
             try {
                 val packageElement = SinglePackageElement(
+                    elementID!!,
                     projectID,
                     brickID!!.toInt(),
                     brickTypeID!!.toInt(),
