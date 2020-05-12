@@ -3,6 +3,7 @@ package com.example.bricklistapplication
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
+import com.example.bricklistapplication.Model.SinglePackageElement
 import org.w3c.dom.Document
 import org.w3c.dom.Element
 import org.w3c.dom.Node

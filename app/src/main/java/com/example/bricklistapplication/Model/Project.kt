@@ -1,4 +1,4 @@
-package com.example.bricklistapplication
+package com.example.bricklistapplication.Model
 
 import android.os.Build
 import androidx.annotation.RequiresApi

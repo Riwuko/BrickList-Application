@@ -1,4 +1,4 @@
-package com.example.bricklistapplication
+package com.example.bricklistapplication.Model
 
 class SinglePackageElement(
     id:Int, projectID:Int,

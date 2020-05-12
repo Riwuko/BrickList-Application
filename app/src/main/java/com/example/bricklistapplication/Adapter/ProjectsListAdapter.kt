@@ -1,4 +1,4 @@
-package com.example.bricklistapplication
+package com.example.bricklistapplication.Adapter
 
 import LegoDataBaseHelper
 import android.content.Context
@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.CheckBox
 import android.widget.TextView
+import com.example.bricklistapplication.Model.Project
+import com.example.bricklistapplication.R
 
 class ProjectsListAdapter(context: Context?, resource: Int, objects: MutableList<Project>?, var activeOnly: Boolean) : ArrayAdapter<Project>(
     context!!, resource, objects as MutableList<Project>
@@ -29,23 +31,17 @@ class ProjectsListAdapter(context: Context?, resource: Int, objects: MutableList
         loadDataBase()
         val project = getItem(position)
 
-        if (project!!.getIsActive()!!){
-            checkBox.isChecked=true
-        }else{
-            checkBox.isChecked=false
+        checkBox.isChecked= project!!.getIsActive()!!
+        if (!project.getIsActive()!!){
             if(this.activeOnly) dataSource!!.remove(project)
         }
+
         checkBox.setOnClickListener {
-            if(checkBox.isChecked){
-                legoDataBaseHelper?.updateProjectActivation(true,project.getId()!!.toInt())
-                getItem(position)?.setIsActive(true)
-            } else{
-                getItem(position)!!.setIsActive(false)
-                if(this.activeOnly)
-                    legoDataBaseHelper!!.updateProjectActivation(false,project.getId()!!.toInt())
-                    getItem(position)?.setIsActive(false)
-                    dataSource!!.remove(project)
+            if(!checkBox.isChecked){
+                if(this.activeOnly) dataSource!!.remove(project)
             }
+            legoDataBaseHelper?.updateProjectActivation(checkBox.isChecked,project.getId()!!.toInt())
+            getItem(position)?.setIsActive(checkBox.isChecked)
             notifyDataSetChanged()
         }
     }
