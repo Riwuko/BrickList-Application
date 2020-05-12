@@ -1,4 +1,4 @@
-package com.example.bricklistapplication
+package com.example.bricklistapplication.Activity
 
 import LegoDataBaseHelper
 import android.Manifest
@@ -6,11 +6,14 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Environment
 import android.provider.AlarmClock
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
+import com.example.bricklistapplication.Adapter.PackageElementsListAdapter
+import com.example.bricklistapplication.Model.SinglePackageElement
+import com.example.bricklistapplication.R
+import com.example.bricklistapplication.XMLHandler
 import kotlinx.android.synthetic.main.activity_project.*
 import java.io.File
 import java.time.LocalDateTime
@@ -47,7 +50,7 @@ class ProjectActivity : AppCompatActivity() {
     fun exportXMLHandler(){
         buttonGetXML.setOnClickListener {
             val filePath: File? = this.getExternalFilesDir(null)
-            val fileName = "$projectName.xml"
+            val fileName = "EXPORT_$projectName.xml"
             val fullFilePath = filePath.toString() + fileName
 
             createToast("Pobieranie...")
@@ -76,7 +79,12 @@ class ProjectActivity : AppCompatActivity() {
     }
 
     fun updatePackageElementsListView(){
-        val packageElementAdapter = PackageElementsListAdapter(this,R.layout.package_elements_row,packageElementsList)
+        val packageElementAdapter =
+            PackageElementsListAdapter(
+                this,
+                R.layout.package_elements_row,
+                packageElementsList
+            )
         listViewPackage.adapter = packageElementAdapter
 
     }

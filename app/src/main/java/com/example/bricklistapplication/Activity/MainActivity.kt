@@ -1,4 +1,4 @@
-package com.example.bricklistapplication
+package com.example.bricklistapplication.Activity
 
 import LegoDataBaseHelper
 import android.content.Intent
@@ -8,6 +8,10 @@ import android.os.Bundle
 import android.provider.AlarmClock.EXTRA_MESSAGE
 import android.widget.AdapterView
 import androidx.annotation.RequiresApi
+import com.example.bricklistapplication.Adapter.ProjectsListAdapter
+import com.example.bricklistapplication.Model.Project
+import com.example.bricklistapplication.R
+import com.example.bricklistapplication.SettingsHandler
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -32,8 +36,11 @@ class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onResume(){
         super.onResume()
+        loadApplicationSettings()
         loadDataBase()
         updateProjectsListView()
+        setButtons()
+        setOnClickProject()
     }
 
     fun setOnClickProject(){
@@ -59,7 +66,13 @@ class MainActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     fun updateProjectsListView(){
         projectsList = LegoDataBase?.getProjects(activeOnly)!!
-        val projectsListAdapter = ProjectsListAdapter(this, R.layout.projects_list_row,projectsList,activeOnly)
+        val projectsListAdapter =
+            ProjectsListAdapter(
+                this,
+                R.layout.projects_list_row,
+                projectsList,
+                activeOnly
+            )
         listViewProjects.adapter = projectsListAdapter
     }
 
@@ -69,12 +82,9 @@ class MainActivity : AppCompatActivity() {
 
     fun loadApplicationSettings() {
         val sharedPref = getSharedPreferences("Options_prefs", 0)
-        if(sharedPref.contains("prefix")) {
-            usingPrefix = sharedPref.getString("prefix", "").toString()
-        } else usingPrefix = "http://fcds.cs.put.poznan.pl/MyWeb/BL/"
-        if(sharedPref.contains("activeOnly")) {
-            activeOnly = sharedPref.getString("activeOnly", "")?.toBoolean()!!
-        } else activeOnly = false
+        val settingsHandler = SettingsHandler()
+        activeOnly = settingsHandler.getActiveOnly(sharedPref)
+        usingPrefix = settingsHandler.getUsingPrefix(sharedPref)
     }
 
 

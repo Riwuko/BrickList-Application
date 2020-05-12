@@ -1,4 +1,4 @@
-package com.example.bricklistapplication
+package com.example.bricklistapplication.Activity
 
 import android.content.Context
 import android.content.Intent
@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.CompoundButton
 import android.widget.TextView
+import com.example.bricklistapplication.R
+import com.example.bricklistapplication.SettingsHandler
 import kotlinx.android.synthetic.main.activity_settings.*
 
 class SettingsActivity : AppCompatActivity() {
@@ -52,24 +54,17 @@ class SettingsActivity : AppCompatActivity() {
 
     fun loadApplicationSettings() {
         val sharedPref = getSharedPreferences("Options_prefs", 0)
-        if(sharedPref.contains("prefix")) {
-            usingPrefix = sharedPref.getString("prefix", "")
-        }else usingPrefix = "http://fcds.cs.put.poznan.pl/MyWeb/BL/"
-        if(sharedPref.contains("activeOnly")) {
-            activeOnly = sharedPref.getString("activeOnly", "")?.toBoolean()
-        } else activeOnly = false
+        val settingsHandler = SettingsHandler()
+        activeOnly = settingsHandler.getActiveOnly(sharedPref)
+        usingPrefix = settingsHandler.getUsingPrefix(sharedPref)
     }
 
     fun saveApplicationSettings() {
         val sharedPreference =  getSharedPreferences("Options_prefs", Context.MODE_PRIVATE)
-        val editor = sharedPreference.edit()
         val switch = switchShowInactive
-        activeOnly = switch.isChecked
-        editor.putString("activeOnly",activeOnly.toString())
+        val editText = editTextPrefix
+        val settingsHandler = SettingsHandler()
+        settingsHandler.saveApplicationSettings(sharedPreference,switch,editText)
 
-        usingPrefix = editTextPrefix.text.toString()
-        editor.putString("usingPrefix",usingPrefix)
-
-        editor.apply()
     }
 }

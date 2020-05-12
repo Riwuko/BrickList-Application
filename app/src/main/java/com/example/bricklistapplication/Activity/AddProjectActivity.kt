@@ -1,4 +1,4 @@
-package com.example.bricklistapplication
+package com.example.bricklistapplication.Activity
 
 import LegoDataBaseHelper
 import android.content.Intent
@@ -8,6 +8,12 @@ import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import com.example.bricklistapplication.DownloadTask
+import com.example.bricklistapplication.Model.Project
+import com.example.bricklistapplication.Model.SinglePackageElement
+import com.example.bricklistapplication.R
+import com.example.bricklistapplication.SettingsHandler
+import com.example.bricklistapplication.XMLHandler
 import kotlinx.android.synthetic.main.activity_add_project.*
 import java.io.File
 import java.time.LocalDateTime
@@ -40,7 +46,7 @@ class AddProjectActivity : AppCompatActivity() {
         if(getInputValues()) {
             val fileUrl = usingPrefix + choosenId + ".xml"
             val filePath: File? = this.getExternalFilesDir(null)
-            val fileName = choosenId.toString() + projectName+ ".xml"
+            val fileName = "IMPORT_"+choosenId.toString() + projectName+ ".xml"
             val fullFilePath = filePath.toString() + fileName
 
             if (downloadFile(fileUrl, fileName, filePath.toString())) {
@@ -59,10 +65,15 @@ class AddProjectActivity : AppCompatActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     fun createProject(packageItems: ArrayList<ArrayList<String>>){
         val projectID = LegoDataBaseHelper?.generateProjectID()
-        val project:Project?
+        val project: Project?
         println("\n\nProjectID: "+projectID)
         println("ProjectName: "+projectName+"\n\n")
-        project = Project(projectID!!.toInt(),projectName.toString(),true, LocalDateTime.now().toString())
+        project = Project(
+            projectID!!.toInt(),
+            projectName.toString(),
+            true,
+            LocalDateTime.now().toString()
+        )
         LegoDataBaseHelper?.insertProject(project)
 
         for (item in packageItems){
@@ -86,20 +97,21 @@ class AddProjectActivity : AppCompatActivity() {
             }
             val TypeCode = LegoDataBaseHelper?.getItemTypeCode(TypeID!!)!!
             try {
-                val packageElement = SinglePackageElement(
-                    id,
-                    projectID,
-                    ItemID!!.toInt(),
-                    TypeID!!.toInt(),
-                    ColorID,
-                    brickQuantityInSet,
-                    brickQuantityInStore,
-                    ItemCode,
-                    PartDescription,
-                    ColorCode,
-                    ImageCode.toString(),
-                    TypeCode
-                )
+                val packageElement =
+                    SinglePackageElement(
+                        id,
+                        projectID,
+                        ItemID!!.toInt(),
+                        TypeID!!.toInt(),
+                        ColorID,
+                        brickQuantityInSet,
+                        brickQuantityInStore,
+                        ItemCode,
+                        PartDescription,
+                        ColorCode,
+                        ImageCode.toString(),
+                        TypeCode
+                    )
                 LegoDataBaseHelper?.insertPackageElement(packageElement)
                 LegoDataBaseHelper?.close()
             }catch (ex:Exception) {
@@ -114,7 +126,11 @@ class AddProjectActivity : AppCompatActivity() {
     }
 
     fun downloadFile(fileUrl: String,fileName: String,filePath: String): Boolean {
-        val downloadTask = DownloadTask(fileUrl, fileName, filePath)
+        val downloadTask = DownloadTask(
+            fileUrl,
+            fileName,
+            filePath
+        )
         return downloadTask.downloadFromURL()
     }
 
@@ -143,12 +159,9 @@ class AddProjectActivity : AppCompatActivity() {
 
     fun loadApplicationSettings() {
         val sharedPref = getSharedPreferences("Options_prefs", 0)
-        if(sharedPref.contains("prefix")) {
-            usingPrefix = sharedPref.getString("prefix", "")
-        }else usingPrefix = "http://fcds.cs.put.poznan.pl/MyWeb/BL/"
-        if(sharedPref.contains("activeOnly")) {
-            activeOnly = sharedPref.getString("activeOnly", "")?.toBoolean()
-        } else activeOnly = false
+        val settingsHandler = SettingsHandler()
+        activeOnly = settingsHandler.getActiveOnly(sharedPref)
+        usingPrefix = settingsHandler.getUsingPrefix(sharedPref)
     }
 
 

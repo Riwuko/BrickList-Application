@@ -5,8 +5,8 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.example.bricklistapplication.Project
-import com.example.bricklistapplication.SinglePackageElement
+import com.example.bricklistapplication.Model.Project
+import com.example.bricklistapplication.Model.SinglePackageElement
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -131,7 +131,7 @@ class LegoDataBaseHelper(context: Context) :
         db.close()
     }
 
-    fun insertProject(project:Project){
+    fun insertProject(project: Project){
         val values = ContentValues()
         values.put("Name",project.getName())
         values.put("Active",project.getIsActive())
@@ -276,7 +276,12 @@ class LegoDataBaseHelper(context: Context) :
             val id = cursor.getInt(0)
             val active = cursor.getInt(2).toBoolean()
             val curDate = LocalDateTime.now().toString()
-            val project  = Project(id,name,active, curDate)
+            val project  = Project(
+                id,
+                name,
+                active,
+                curDate
+            )
             projects.add(project)
         }
         cursor.close()
@@ -308,7 +313,21 @@ class LegoDataBaseHelper(context: Context) :
             val itemDescription = getColorName(colorID) + " " + getPartName(itemID)
             val typeCode = getItemTypeCode(typeID)
 
-            val part = SinglePackageElement(ID,projectId,itemID,typeID,colorID,quantityInSet,quantityInStore, itemCode, itemDescription, colorCode, imageCode.toString(), typeCode)
+            val part =
+                SinglePackageElement(
+                    ID,
+                    projectId,
+                    itemID,
+                    typeID,
+                    colorID,
+                    quantityInSet,
+                    quantityInStore,
+                    itemCode,
+                    itemDescription,
+                    colorCode,
+                    imageCode.toString(),
+                    typeCode
+                )
             packageElements.add(part)
         }
         cursor.close()

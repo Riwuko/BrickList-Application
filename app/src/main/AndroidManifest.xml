@@ -17,10 +17,10 @@
         tools:targetApi="m">
         <activity android:name=".SinglePackageElementActivity" />
         <activity android:name=".ProjectsListElementActivity" />
-        <activity android:name=".ProjectActivity" />
-        <activity android:name=".AddProjectActivity" />
-        <activity android:name=".SettingsActivity" />
-        <activity android:name=".MainActivity">
+        <activity android:name=".Activity.ProjectActivity" />
+        <activity android:name=".Activity.AddProjectActivity" />
+        <activity android:name=".Activity.SettingsActivity" />
+        <activity android:name=".Activity.MainActivity">
 		
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

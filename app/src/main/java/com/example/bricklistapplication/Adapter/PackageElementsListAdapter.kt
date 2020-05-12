@@ -1,4 +1,4 @@
-package com.example.bricklistapplication
+package com.example.bricklistapplication.Adapter
 
 import LegoDataBaseHelper
 import android.annotation.SuppressLint
@@ -11,6 +11,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import com.example.bricklistapplication.DownloadTask
+import com.example.bricklistapplication.Model.SinglePackageElement
+import com.example.bricklistapplication.R
 
 class PackageElementsListAdapter(context: Context?, resource: Int, objects: MutableList<SinglePackageElement>) : ArrayAdapter<SinglePackageElement>(
     context!!, resource, objects) {
